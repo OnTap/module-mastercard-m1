@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+<config>
+
+	<modules>
+		<Mastercard_Mpgs>
+			<version>1.0.0</version>
+		</Mastercard_Mpgs>
+	</modules>
+
+	<global>
+
+		<models>
+			<mpgs>
+				<class>Mastercard_Mpgs_Model</class>
+			</mpgs>
+		</models>
+
+		<blocks>
+			<mpgs>
+				<class>Mastercard_Mpgs_Block</class>
+			</mpgs>
+		</blocks>
+
+		<helpers>
+			<mpgs>
+				<class>Mastercard_Mpgs_Helper</class>
+			</mpgs>
+		</helpers>
+
+		<resources>
+			<Mastercard_mpgs_setup>
+				<setup>
+					<module>Mastercard_Mpgs</module>
+				</setup>
+			</Mastercard_mpgs_setup>
+		</resources>
+
+		<events>
+			<sales_order_payment_save_before>
+				<observers>
+					<mastercard_mpgs_model_observer>
+						<type>model</type>
+						<class>mpgs/observer</class>
+						<method>updateResultCode</method>
+					</mastercard_mpgs_model_observer>
+				</observers>
+			</sales_order_payment_save_before>
+			<payment_info_block_prepare_specific_information>
+				<observers>
+					<mastercard_mpgs_model_observer>
+						<type>model</type>
+						<class>mpgs/observer</class>
+						<method>paymentInfoBlockPrepareSpecificInformation</method>
+					</mastercard_mpgs_model_observer>
+				</observers>
+			</payment_info_block_prepare_specific_information>
+			<sales_order_load_after>
+				<observers>
+					<mastercard_mpgs_model_observer>
+						<type>model</type>
+						<class>mpgs/observer</class>
+						<method>addExtraInfoOrder</method>
+					</mastercard_mpgs_model_observer>
+				</observers>
+			</sales_order_load_after>
+		</events>
+
+		<Mastercard>
+			<transaction>
+				<types>
+					<auth>
+						<code>authorize</code>
+						<name>Authorise Only</name>
+						<order>0</order>
+					</auth>
+					<pre>
+						<code>authorize_capture</code>
+						<name>Authorise and Capture</name>
+						<order>10</order>
+					</pre>
+				</types>
+			</transaction>
+			<endpoints>
+				<europe>
+					<name>Europe</name>
+					<url>https://eu-gateway.mastercard.com/</url>
+				</europe>
+				<asiapacific>
+					<name>Asia Pacific</name>
+					<url>https://ap-gateway.mastercard.com/</url>
+				</asiapacific>
+				<northamerica>
+					<name>North America </name>
+					<url>https://na-gateway.mastercard.com/</url>
+				</northamerica>
+			</endpoints>
+		</Mastercard>
+
+	</global>
+
+	<frontend>
+
+		<routers>
+			<checkout>
+				<args>
+					<modules>
+						<mpgs before="Mage_Checkout">Mastercard_Mpgs</mpgs>
+					</modules>
+				</args>
+			</checkout>
+			<webhook>
+				<use>standard</use>
+				<args>
+					<module>Mastercard_Mpgs</module>
+					<frontName>mastercard</frontName>
+				</args>
+			</webhook>
+		</routers>
+
+		<translate>
+			<modules>
+				<Mastercard_Mpgs>
+					<files>
+						<default>Mastercard_Mpgs.csv</default>
+					</files>
+				</Mastercard_Mpgs>
+			</modules>
+		</translate>
+
+		<layout>
+			<updates>
+				<mpgs>
+					<file>Mastercard.xml</file>
+				</mpgs>
+			</updates>
+		</layout>
+
+	</frontend>
+
+	<default>
+
+		<payment>
+			<Mastercard_hosted>
+				<model>mpgs/method_hosted</model>
+				<active>0</active>
+				<payment_action>authorize</payment_action>
+				<title>Credit Card</title>
+				<api_username />
+				<api_password />
+				<end_point_url>https://eu-gateway.mastercard.com/</end_point_url>
+				<webhook_secret />
+				<webhook_url />
+				<debug>0</debug>
+				<test>0</test>
+				<order_status>processing</order_status>
+				<currency />
+				<allowspecific>0</allowspecific>
+			</Mastercard_hosted>
+		</payment>
+
+	</default>
+
+</config>

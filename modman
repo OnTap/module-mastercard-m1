@@ -1,0 +1,6 @@
+app/code/community/Mastercard/Mpgs/                    app/code/community/Mastercard/Mpgs/
+app/design/adminhtml/default/default/template/*        app/design/adminhtml/default/default/template/
+app/design/frontend/base/default/template/*            app/design/frontend/base/default/template/
+app/design/frontend/base/default/layout/*              app/design/frontend/base/default/layout/
+app/locale/en_GB/*                                     app/locale/en_GB/
+app/etc/modules/Mastercard_MPGS.xml                    app/etc/modules/

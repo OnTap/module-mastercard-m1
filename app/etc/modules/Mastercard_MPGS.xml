@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config>
+	<modules>
+		<Mastercard_Mpgs>
+			<active>true</active>
+			<codePool>community</codePool>
+			<depends>
+				<Mage_Core />
+				<Mage_Payment />
+			</depends>
+		</Mastercard_Mpgs>
+	</modules>
+</config>

@@ -1,0 +1,2 @@
+# This package does not have prechecks as it is built on third party code in PHP. Adding this file so that prechecks
+# will run for CRP purposes, and for potential future prechecks, which will require PHP installed as default on VMs

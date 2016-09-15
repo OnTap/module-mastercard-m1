@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<config>
+	<api2>
+		<resource_groups>
+			<mpgs translate="title" module="mpgs">
+				<title>Mpgs Rest API</title>
+				<sort_order>10</sort_order>
+			</mpgs>
+		</resource_groups>
+		<resources>
+			<mpgs translate="title" module="mpgs">
+				<group>mpgs</group>
+				<model>mpgs/api2_restapi</model>
+				<title>Mpgs Rest API</title>
+				<sort_order>10</sort_order>
+				<privileges>
+					<guest>
+						<create>1</create>
+					</guest>
+				</privileges>
+				<attributes translate="cartid" module="mpgs">
+					<cartid>Cart ID</cartid>
+					<SessionID>Session ID</SessionID>
+					<SessionVersion>Session Version</SessionVersion>
+					<merchant>Merchant</merchant>
+				</attributes>
+				<routes>
+					<route_collection>
+						<route>/createsession</route>
+						<action_type>collection</action_type>
+					</route_collection>
+				</routes>
+				<versions>1</versions>
+			</mpgs>
+		</resources>
+	</api2>
+</config>
