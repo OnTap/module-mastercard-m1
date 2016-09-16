@@ -43,6 +43,7 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object {
 	const API_USERNAME = 'payment/Mastercard_hosted/api_username';
 	const API_PASSWORD = 'payment/Mastercard_hosted/api_password';
 	const END_POINT_URL = 'payment/Mastercard_hosted/end_point_url';
+	const CUSTOM_END_POINT_URL = 'payment/Mastercard_hosted/end_point_custom';
 	const WEBHOOK_SECRET = 'payment/Mastercard_hosted/webhook_secret';
 	const WEBHOOK_URL = 'payment/Mastercard_hosted/webhook_url';
 	const CURRENCY = 'payment/Mastercard_hosted/currency';
@@ -118,14 +119,28 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object {
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getEndPointUrl() {
+
+		$url = Mage::getStoreConfig( self::END_POINT_URL );
+
+		if ($url == 'custom') {
+			$url = Mage::getStoreConfig( self::CUSTOM_END_POINT_URL );
+		}
+		$url .= substr( $url, - 1 ) !== '/' ? '/' : '';
+
+		return $url;
+	}
+
+	/**
 	 * Retrieve MPGS NVP API url.
 	 *
 	 * @return string
 	 */
 	public function getRestApiUrl() {
 
-		$url = Mage::getStoreConfig( self::END_POINT_URL );
-		$url .= substr( $url, - 1 ) !== '/' ? '/' : '';
+		$url = $this->getEndPointUrl();
 		$url .= 'api/rest/version/' . self::API_VERSION . '/merchant/';
 
 		return $url;
@@ -139,8 +154,7 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object {
 	 */
 	public function getJsApiUrl() {
 
-		$url = Mage::getStoreConfig( self::END_POINT_URL );
-		$url .= substr( $url, - 1 ) !== '/' ? '/' : '';
+		$url = $this->getEndPointUrl();
 		$url .= 'checkout/version/' . self::API_VERSION . '/checkout.js';
 
 		return $url;

@@ -75,6 +75,17 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
 						</end_point_url>
+						<end_point_custom translate="label">
+							<label>Custom End Point URL</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>46</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<depends>
+								<end_point_url>custom</end_point_url>
+							</depends>
+						</end_point_custom>
 						<webhook_secret translate="label">
 							<label>WebHook Secret</label>
 							<comment>

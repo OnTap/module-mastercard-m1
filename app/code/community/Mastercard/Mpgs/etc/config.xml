@@ -93,6 +93,10 @@
 					<name>North America </name>
 					<url>https://na-gateway.mastercard.com/</url>
 				</northamerica>
+				<other>
+					<name>Other</name>
+					<url>custom</url>
+				</other>
 			</endpoints>
 		</Mastercard>
 

@@ -22,7 +22,7 @@
  * @author Rafael Waldo Delgado Doblas
  * @version $Id$
  * @copyright Mastercard, 1 Jul, 2016
- * @license http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * @license http://opensource.org/licenses/osl-3.0.php	Open Software License (OSL 3.0)
  * @package Mastercard
  **/
 
@@ -141,7 +141,8 @@ class Mastercard_Mpgs_Model_Observer {
 			return;
 		}
 
-		$isCaptured = ! empty( $order->getTotalPaid() );
+		$totalPaid = $order->getTotalPaid();
+		$isCaptured = ! empty( $totalPaid );
 		if ($isCaptured) {
 			$order->setActionFlag( Mage_Sales_Model_Order::ACTION_FLAG_CANCEL, false );
 
