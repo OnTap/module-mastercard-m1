@@ -21,7 +21,7 @@
 						<active translate="label comment">
 							<label>Enabled</label>
 							<comment>
-								<![CDATA[Be sure grant guest access to Mpgs Rest API and its resources in <b>&ldquo;System&rdquo; &rarr; &ldquo;REST - Roles&rdquo;</b> and <b>&ldquo;System&rdquo; &rarr; &ldquo;REST - Attributes&rdquo;</b>.]]>
+								<![CDATA[Be sure grant guest access to Mpgs Rest API and its resources in <b>System -> Web Services -> REST - Roles</b> and <b>System -> Web Services -> REST - Attributes</b>]]>
 							</comment>
 							<frontend_type>select</frontend_type>
 							<source_model>adminhtml/system_config_source_yesno</source_model>

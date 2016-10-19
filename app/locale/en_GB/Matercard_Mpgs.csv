@@ -42,7 +42,7 @@
 "Invalid data received (Order ID)","Invalid data received (Order ID)"
 "Mastercard Mpgs WebHook Exception: '%s'","Mastercard Mpgs WebHook Exception: '%s'"
 "Mastercard Hosted Checkout","Mastercard Hosted Checkout"
-"Be sure grant guest access to Mpgs Rest API and its resources in <b>&ldquo;System&rdquo; &rarr; &ldquo;REST - Roles&rdquo;</b> and <b>&ldquo;System&rdquo; &rarr; &ldquo;REST - Attributes&rdquo;</b>.","Be sure grant guest access to Mpgs Rest API and its resources in <b>&ldquo;System&rdquo; &rarr; &ldquo;REST - Roles&rdquo;</b> and <b>&ldquo;System&rdquo; &rarr; &ldquo;REST - Attributes&rdquo;</b>."
+"Be sure grant guest access to Mpgs Rest API and its resources in <b>System -> Web Services -> REST - Roles</b> and <b>System -> Web Services -> REST - Attributes</b>","Be sure grant guest access to Mpgs Rest API and its resources in <b>System -> Web Services -> REST - Roles and System -> Web Services -> REST - Attributes</b>"
 "Enabled","Enabled"
 "Payment Action", "Payment Action"
 "Title","Title"
