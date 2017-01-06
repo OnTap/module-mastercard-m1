@@ -25,5 +25,6 @@
  * @license http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  * @package Mastercard
  **/
-class Mastercard_Mpgs_Model_Mpgs extends Mage_Core_Model_Abstract {
+class Mastercard_Mpgs_Model_Mpgs extends Mage_Core_Model_Abstract
+{
 }

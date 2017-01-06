@@ -25,5 +25,6 @@
  * @license http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  * @package Mastercard
  **/
-class Mastercard_Mpgs_Model_Api2_Restapi extends Mage_Api2_Model_Resource {
+class Mastercard_Mpgs_Model_Api2_Restapi extends Mage_Api2_Model_Resource
+{
 }

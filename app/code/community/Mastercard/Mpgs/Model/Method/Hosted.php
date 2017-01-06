@@ -35,135 +35,141 @@
  * @subpackage Block
  * @author Rafael Waldo Delgado Doblas
  */
-class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_Abstract {
-	const METHOD_NAME = 'Mastercard_hosted';
-	protected $_code = self::METHOD_NAME;
-	protected $_infoBlockType = 'payment/info';
+class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_Abstract
+{
+    const METHOD_NAME = 'Mastercard_hosted';
+    protected $_code = self::METHOD_NAME;
+    protected $_infoBlockType = 'payment/info';
 
-	/**
-	 * Payment Method features.
-	 *
-	 * @var bool
-	 */
-	protected $_isGateway = true;
-	protected $_canAuthorize = true;
-	protected $_canCapture = true;
-	protected $_canCapturePartial = true;
-	protected $_canRefund = true;
-	protected $_canRefundInvoicePartial = true;
-	protected $_canVoid = true;
-	protected $_canUseInternal = false;
-	protected $_canUseCheckout = true;
-	protected $_canUseForMultishipping = false;
-	protected $_isInitializeNeeded = false;
-	private $_resultCode = '';
+    /**
+     * Payment Method features.
+     *
+     * @var bool
+     */
+    protected $_isGateway = true;
+    protected $_canAuthorize = true;
+    protected $_canCapture = true;
+    protected $_canCapturePartial = true;
+    protected $_canRefund = true;
+    protected $_canRefundInvoicePartial = true;
+    protected $_canVoid = true;
+    protected $_canUseInternal = false;
+    protected $_canUseCheckout = true;
+    protected $_canUseForMultishipping = false;
+    protected $_isInitializeNeeded = false;
+    private $_resultCode = '';
 
-	/**
-	 *
-	 * @param array $params
-	 *
-	 * @return Mastercard_Mpgs_Model_Method_Abstract
-	 */
-	public function __construct( $params = array() ) {
+    /**
+     *
+     * @param array $params
+     *
+     * @return Mastercard_Mpgs_Model_Method_Abstract
+     */
+    public function __construct( $params = array() ) 
+    {
 
-		parent::__construct( $params );
+        parent::__construct($params);
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Sets the result code from the MPGS payment response.
-	 *
-	 * @param string $resultCode
-	 *
-	 */
-	public function setResultCode( $resultCode ) {
+    /**
+     * Sets the result code from the MPGS payment response.
+     *
+     * @param string $resultCode
+     *
+     */
+    public function setResultCode( $resultCode ) 
+    {
 
-		$this->_resultCode = $resultCode;
+        $this->_resultCode = $resultCode;
 
-	}
+    }
 
-	protected function verifyResultCode( $payment ) {
+    protected function verifyResultCode( $payment ) 
+    {
 
-		$successIndicator = $payment->getAdditionalInformation( "successIndicator" );
-		if ($this->_resultCode != $successIndicator) {
-			$helper = Mage::helper( 'mpgs' );
-			Mage::throwException( $helper->maskDebugMessages( "Error successIndicator doesnt match with resultCode." ) );
-		}
+        $successIndicator = $payment->getAdditionalInformation("successIndicator");
+        if ($this->_resultCode != $successIndicator) {
+            $helper = Mage::helper('mpgs');
+            Mage::throwException($helper->maskDebugMessages("Error successIndicator doesnt match with resultCode."));
+        }
 
-	}
+    }
 
-	/**
-	 * Capture the payment.
-	 * This method is called when auth and capture mode is selected.
-	 *
-	 * @param Varien_Object $payment
-	 * @param string $amount
-	 * @return Mastercard_Mpgs_Model_Method_Hosted
-	 * @author Rafel Waldo Delgado Doblas
-	 */
-	public function capture( Varien_Object $payment, $amount ) {
+    /**
+     * Capture the payment.
+     * This method is called when auth and capture mode is selected.
+     *
+     * @param Varien_Object $payment
+     * @param string $amount
+     * @return Mastercard_Mpgs_Model_Method_Hosted
+     * @author Rafel Waldo Delgado Doblas
+     */
+    public function capture( Varien_Object $payment, $amount ) 
+    {
 
-		parent::capture( $payment, $amount );
-		$helper = Mage::helper( 'mpgs/mpgsRest' );
+        parent::capture($payment, $amount);
+        $helper = Mage::helper('mpgs/mpgsRest');
 
-		$txnAuth = $payment->getAuthorizationTransaction();
-		$captureInfo = $payment->getAdditionalInformation( 'webhook_info' );
-		if (empty( $captureInfo )) {
-			$restAPI = Mage::getSingleton( 'mpgs/mpgsApi_rest' );
+        $txnAuth = $payment->getAuthorizationTransaction();
+        $captureInfo = $payment->getAdditionalInformation('webhook_info');
+        if (empty($captureInfo)) {
+            $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
 
-			$mpgs_id = $payment->getAdditionalInformation( 'mpgs_id' );
-			$orderInfo = $restAPI->retrieve_order( $mpgs_id );
-			$helper->updatePaymentInfo( $payment, $orderInfo );
+            $mpgs_id = $payment->getAdditionalInformation('mpgs_id');
+            $orderInfo = $restAPI->retrieve_order($mpgs_id);
+            $helper->updatePaymentInfo($payment, $orderInfo);
 
-			$currency = $payment->getOrder()->getStore()->getBaseCurrencyCode();
-			$captureInfo = $restAPI->capture_order( $mpgs_id, $amount, $currency );
+            $currency = $payment->getOrder()->getStore()->getBaseCurrencyCode();
+            $captureInfo = $restAPI->capture_order($mpgs_id, $amount, $currency);
 
-			if (empty( $txnAuth )) {
-				// Creates an auth txn on magento side
-				$this->verifyResultCode( $payment );
-				$authTxnInfo = $helper->searchTxnByType( $orderInfo, 'AUTHORIZATION' );
-				$txnAuth = $helper->addAuthTxnPayment( $payment, $authTxnInfo, $helper->isAllPaid( $payment, $captureInfo ) );
-			}
-		}
+            if (empty($txnAuth)) {
+                // Creates an auth txn on magento side
+                $this->verifyResultCode($payment);
+                $authTxnInfo = $helper->searchTxnByType($orderInfo, 'AUTHORIZATION');
+                $txnAuth = $helper->addAuthTxnPayment($payment, $authTxnInfo, $helper->isAllPaid($payment, $captureInfo));
+            }
+        }
 
-		// Creates an capture txn on magento side
-		$helper->updateTransferInfo( $payment, $captureInfo );
-		$helper->addCaptureTxnPayment( $payment, $captureInfo, $txnAuth->getTxnId(), $helper->isAllPaid( $payment, $captureInfo ) );
+        // Creates an capture txn on magento side
+        $helper->updateTransferInfo($payment, $captureInfo);
+        $helper->addCaptureTxnPayment($payment, $captureInfo, $txnAuth->getTxnId(), $helper->isAllPaid($payment, $captureInfo));
 
-		return $this;
+        return $this;
 
-	}
+    }
 
-	/**
-	 * Authorise the payment.
-	 * This method is called when auth mode is selected.
-	 *
-	 * @param Varien_Object $payment
-	 * @param string $amount
-	 * @return Mastercard_Mpgs_Model_Method_Hosted
-	 * @author Rafel Waldo Delgado Doblas
-	 */
-	public function authorize( Varien_Object $payment, $amount ) {
+    /**
+     * Authorise the payment.
+     * This method is called when auth mode is selected.
+     *
+     * @param Varien_Object $payment
+     * @param string $amount
+     * @return Mastercard_Mpgs_Model_Method_Hosted
+     * @author Rafel Waldo Delgado Doblas
+     */
+    public function authorize( Varien_Object $payment, $amount ) 
+    {
 
-		$this->verifyResultCode( $payment );
+        $this->verifyResultCode($payment);
 
-		parent::authorize( $payment, $amount );
+        parent::authorize($payment, $amount);
 
-		$helper = Mage::helper( 'mpgs/mpgsRest' );
-		$restAPI = Mage::getSingleton( 'mpgs/mpgsApi_rest' );
+        $helper = Mage::helper('mpgs/mpgsRest');
+        $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
 
-		$mpgs_id = $payment->getAdditionalInformation( 'mpgs_id' );
-		$orderInfo = $restAPI->retrieve_order( $mpgs_id );
-		$helper->updatePaymentInfo( $payment, $orderInfo );
+        $mpgs_id = $payment->getAdditionalInformation('mpgs_id');
+        $orderInfo = $restAPI->retrieve_order($mpgs_id);
+        $helper->updatePaymentInfo($payment, $orderInfo);
 
-		$authTxnInfo = $helper->searchTxnByType( $orderInfo, 'AUTHORIZATION' );
+        $authTxnInfo = $helper->searchTxnByType($orderInfo, 'AUTHORIZATION');
 
-		$helper->updateTransferInfo( $payment, $authTxnInfo );
-		$helper->addAuthTxnPayment( $payment, $authTxnInfo, false );
+        $helper->updateTransferInfo($payment, $authTxnInfo);
+        $helper->addAuthTxnPayment($payment, $authTxnInfo, false);
 
-		return $this;
+        return $this;
 
-	}
+    }
 }

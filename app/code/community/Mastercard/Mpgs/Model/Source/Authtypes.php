@@ -35,25 +35,27 @@
  * @subpackage Helper
  * @author Alistair Stead
  */
-class Mastercard_Mpgs_Model_Source_Authtypes {
+class Mastercard_Mpgs_Model_Source_Authtypes
+{
 
-	/**
-	 * Return a list of available authentication types
-	 *
-	 * @return array
-	 * @author Alistair Stead
-	 *
-	 */
-	public function toOptionArray() {
+    /**
+     * Return a list of available authentication types
+     *
+     * @return array
+     * @author Alistair Stead
+     *
+     */
+    public function toOptionArray() 
+    {
 
-		foreach ( Mage::getSingleton( 'mpgs/config' )->getTransactionTypes() as $code => $name ) {
-			$options [] = array (
-					'value' => $code,
-					'label' => $name
-			);
-		}
+        foreach (Mage::getSingleton('mpgs/config')->getTransactionTypes() as $code => $name) {
+            $options [] = array (
+                    'value' => $code,
+                    'label' => $name
+            );
+        }
 
-		return $options;
+        return $options;
 
-	}
+    }
 }
