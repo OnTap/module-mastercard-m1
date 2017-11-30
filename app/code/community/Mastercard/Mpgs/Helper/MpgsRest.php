@@ -186,7 +186,6 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     public function buildInteractionData() 
     {
 
-        $interaction ['merchant'] ['name'] = 'Magento';
         $interaction ['displayControl'] ['customerEmail'] = 'HIDE';
         $interaction ['displayControl'] ['billingAddress'] = 'HIDE';
         $interaction ['displayControl'] ['orderSummary'] = 'HIDE';

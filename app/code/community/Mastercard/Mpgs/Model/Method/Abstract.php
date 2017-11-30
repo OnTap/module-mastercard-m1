@@ -67,7 +67,7 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
 
     }
 
-    public function canVoid( $payment ) 
+    public function canVoid(Varien_Object $payment)
     {
 
         if ($payment instanceof Mage_Sales_Model_Order_Payment) {

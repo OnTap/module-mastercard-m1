@@ -42,18 +42,26 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
     const MPGS_PUT = 2;
 
     /**
+     * @param $err
+     */
+    protected function _critical($err)
+    {
+
+    }
+
+    /**
      * This methods sends a REST HTTP message to the MPGS endpoint
      *
      * @param integer $type
      * @param string $method
      * @param array $data
      *
-     * @return string
-     *
+     * @return array
+     * @throws Mage_Core_Exception
      */
     protected function sender( $type, $method, $data ) 
     {
-
+        /** @var Mastercard_Mpgs_Model_Config $config */
         $config = Mage::getSingleton('mpgs/config');
         $username = $config->getApiUsername();
         $password = $config->getApiPasswordDecrypted();
@@ -61,14 +69,16 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $url = $config->getRestApiUrl() . $username . '/' . $method;
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_USERPWD, "merchant." . $username . ":" . $password);
+
+        $payload = json_encode($data);
         switch ($type) {
             case self::MPGS_POST :
                 curl_setopt($ch, CURLOPT_POST, 1);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
                 break;
             case self::MPGS_PUT :
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
                 break;
         }
 
@@ -80,12 +90,23 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 
         $resData = json_decode($response, true);
 
-        if ($resData ['result'] !== 'SUCCESS') {
+        /** @var Mastercard_Mpgs_Model_Logger $logger */
+        $logger = Mage::getSingleton('mpgs/logger');
+        $logger->logDebug(array(
+            'url' => $url,
+            'type' => $type,
+            'payload' => $payload,
+            'response' => $response
+        ));
+
+        if ($resData['result'] !== 'SUCCESS') {
             $this->_critical(Mage_Api2_Model_Resource::RESOURCE_INTERNAL_ERROR);
+            $e =  new Mage_Core_Exception($resData['error']['explanation']);
+            Mage::logException($e);
+            throw $e;
         }
 
         return $resData;
-
     }
 
     /**

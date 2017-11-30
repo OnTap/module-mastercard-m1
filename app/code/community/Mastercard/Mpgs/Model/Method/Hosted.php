@@ -116,6 +116,7 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
         $txnAuth = $payment->getAuthorizationTransaction();
         $captureInfo = $payment->getAdditionalInformation('webhook_info');
         if (empty($captureInfo)) {
+            /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
             $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
 
             $mpgs_id = $payment->getAdditionalInformation('mpgs_id');

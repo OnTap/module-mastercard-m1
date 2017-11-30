@@ -25,37 +25,14 @@
  * @license http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  * @package Mastercard
  **/
-
-/**
- * This template add some javascript methods needed by MPGS payment to the checkout header
- */
 ?>
-
-<meta http-equiv="Content-Type"
-	content="<?php echo $this->getContentType() ?>" />
-<title><?php echo $this->getTitle() ?></title>
-<meta name="description"
-	content="<?php echo htmlspecialchars($this->getDescription()) ?>" />
-<meta name="keywords"
-	content="<?php echo htmlspecialchars($this->getKeywords()) ?>" />
-<meta name="robots"
-	content="<?php echo htmlspecialchars($this->getRobots()) ?>" />
-<link rel="icon" href="<?php echo $this->getFaviconFile(); ?>"
-	type="image/x-icon" />
-<link rel="shortcut icon" href="<?php echo $this->getFaviconFile(); ?>"
-	type="image/x-icon" />
-<!--[if lt IE 7]>
-<script type="text/javascript">
-//<![CDATA[
-    var BLANK_URL = '<?php echo $this->helper('core/js')->getJsUrl('blank.html') ?>';
-    var BLANK_IMG = '<?php echo $this->helper('core/js')->getJsUrl('spacer.gif') ?>';
-//]]>
-</script>
-<![endif]-->
-<?php echo $this->getCssJsHtml()?>
-<?php echo $this->getChildHtml()?>
-<?php echo $this->helper('core/js')->getTranslatorScript()?>
-<?php echo $this->getIncludes()?>
+<?php
+/** @var Mage_Core_Block_Abstract $this */
+$storeName = Mage::getStoreConfig('general/store_information/name');
+if (!$storeName) {
+    $storeName = 'Magento Store';
+}
+?>
 
 <script
 	src="<?php echo Mage::getSingleton('mpgs/config')->getJsApiUrl(); ?>"
@@ -90,28 +67,34 @@
 		_Checkout.configure({
 			merchant: username,
 			session: {
-				id: sessionId,
-			}
+				id: sessionId
+			},
+            interaction: {
+                merchant: {
+                    name: "<?php echo $this->jsQuoteEscape($storeName, '"'); ?>"
+                }
+            }
 		});
 		_Checkout.showLightbox();
 	}
 
-	var $j = jQuery.noConflict();
 	function showMpgsLightbox(cartid) {
-		$j.ajax({
-			type: "POST",
-			url: '<?php echo Mage::getUrl('api/rest/createsession', array('_secure'=>true)); ?>',
-			dataType: 'json',
-			contentType: 'application/json',
-			async: false,
-			data: '{"cartid": "' + cartid + '"}',
-			success: function (data) {
-				configureMpgs(data.merchant, data.SessionID);
-			},
-			error: function (error) {
-				alert(error.responseJSON.messages.error[0].message);
-			},
-		});
+	    new Ajax.Request('<?php echo Mage::getUrl('api/rest/createsession', array('_secure'=>true)); ?>', {
+	        contentType: 'application/json',
+            requestHeaders: {
+                Accept: 'application/json'
+            },
+            parameters: JSON.stringify({
+                cartid: cartid
+            }),
+            onSuccess: function (response) {
+	            var data = response.responseJSON;
+                configureMpgs(data.merchant, data.SessionID);
+            },
+            onFailure: function (response) {
+                var data = response.responseJSON;
+                alert(data.messages.error[0].message);
+            }
+        });
 	}
-
 </script>
