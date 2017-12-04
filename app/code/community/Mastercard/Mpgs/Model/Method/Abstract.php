@@ -37,21 +37,15 @@
  */
 abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_Method_Abstract
 {
+    /**
+     * @return Mastercard_Mpgs_Model_Config
+     */
+    abstract public function getConfig();
 
     /**
-     *
-     * @param array $params
-     *
-     * @return Mastercard_Mpgs_Model_Method_Abstract
+     * @return mixed
      */
-    public function __construct( $params = array() ) 
-    {
-
-        parent::__construct($params);
-
-        return $this;
-
-    }
+    abstract public function getButtonRenderer();
 
     /**
      * Check method for processing with base currency.
@@ -62,14 +56,15 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
      */
     public function canUseForCurrency( $currencyCode ) 
     {
-
         return $this->getConfig()->getCurrency() === $currencyCode;
-
     }
 
+    /**
+     * @param Varien_Object $payment
+     * @return bool
+     */
     public function canVoid(Varien_Object $payment)
     {
-
         if ($payment instanceof Mage_Sales_Model_Order_Payment) {
             return $payment->getAmountPaid() == 0;
         }
@@ -79,20 +74,20 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
         }
 
         return $this->_canVoid;
-
     }
 
+    /**
+     * @return bool
+     */
     public function canRefund() 
     {
-
         $payment = $this->getInfoInstance()->getOrder()->getPayment();
         $disableFlag = $payment->getAdditionalInformation('disableRefund');
         if (empty($disableFlag)) {
-            return $this->$_canRefund;
+            return $this->_canRefund;
         }
 
         return $disableFlag !== '1';
-
     }
 
     /**
@@ -132,7 +127,6 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
      */
     public function refund( Varien_Object $payment, $amount ) 
     {
-
         parent::refund($payment, $amount);
         $helper = Mage::helper('mpgs/mpgsRest');
 
@@ -151,7 +145,6 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
         }
 
         return $this;
-
     }
 
     /**
@@ -163,7 +156,6 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
      */
     public function cancel( Varien_Object $payment ) 
     {
-
         parent::cancel($payment);
         $helper = Mage::helper('mpgs/mpgsRest');
 
@@ -181,7 +173,6 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
         $helper->addVoidTxnPayment($payment, $voidInfo, $transactionAuth->getTxnId());
 
         return $this;
-
     }
 
     /**
@@ -193,22 +184,8 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
      */
     public function void( Varien_Object $payment ) 
     {
-
         parent::void($payment);
         $this->cancel($payment);
         return $this;
-
-    }
-
-    /**
-     * Return Mpgs config instance.
-     *
-     * @return DataCash_Dpg_Model_Config
-     */
-    public function getConfig() 
-    {
-
-        return Mage::getSingleton('mpgs/config');
-
     }
 }

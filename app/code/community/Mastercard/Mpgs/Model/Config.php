@@ -27,13 +27,7 @@
  **/
 
 /**
- * Mastercard_Mpgs_Model_Config
- *
- * Mastercard Mpgs Config model.
- *
- * @package Mastercard
- * @subpackage Block
- * @author Rafael Waldo Delgado Doblas
+ * Class Mastercard_Mpgs_Model_Config
  */
 class Mastercard_Mpgs_Model_Config extends Varien_Object
 {
@@ -41,14 +35,17 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
     const WEB_HOOK_UPDATE_URL = 'mastercard/webhook/update';
     const TRANSACTION_TYPES = 'global/Mastercard/transaction/types';
     const END_POINTS = 'global/Mastercard/endpoints';
-    const API_USERNAME = 'payment/Mastercard_hosted/api_username';
-    const API_PASSWORD = 'payment/Mastercard_hosted/api_password';
-    const END_POINT_URL = 'payment/Mastercard_hosted/end_point_url';
-    const CUSTOM_END_POINT_URL = 'payment/Mastercard_hosted/end_point_custom';
-    const WEBHOOK_SECRET = 'payment/Mastercard_hosted/webhook_secret';
-    const WEBHOOK_URL = 'payment/Mastercard_hosted/webhook_url';
-    const CURRENCY = 'payment/Mastercard_hosted/currency';
-    const DEBUG = 'payment/Mastercard_hosted/debug';
+
+    const API_USERNAME = 'payment/Mastercard_api/api_username';
+    const API_PASSWORD = 'payment/Mastercard_api/api_password';
+    const END_POINT_URL = 'payment/Mastercard_api/end_point_url';
+    const WEBHOOK_SECRET = 'payment/Mastercard_api/webhook_secret';
+
+    protected $pathCustomEndPointUrl = null;
+    protected $pathTestMode = null;
+    protected $pathWebhookUrl = null;
+    protected $pathCurrency = null;
+    protected $pathDebug = null;
 
     /**
      * Retrieve an array of transaction types.
@@ -57,7 +54,6 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getTransactionTypes() 
     {
-
         $_types = Mage::getConfig()->getNode(self::TRANSACTION_TYPES)->asArray();
 
         $types = array ();
@@ -68,7 +64,6 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
         }
 
         return $types;
-
     }
 
     /**
@@ -78,7 +73,6 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getEndPoints() 
     {
-
         $_endPoints = Mage::getConfig()->getNode(self::END_POINTS)->asArray();
 
         $endPoints = array ();
@@ -89,7 +83,6 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
         }
 
         return $endPoints;
-
     }
 
     /**
@@ -99,14 +92,12 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getApiUsername() 
     {
-
         $username = Mage::getStoreConfig(self::API_USERNAME);
-        if (Mage::getStoreConfig('payment/Mastercard_hosted/test') == 1) {
+        if (Mage::getStoreConfig($this->pathTestMode) == 1) {
             $username = 'TEST' . $username;
         }
 
         return $username;
-
     }
 
     /**
@@ -116,23 +107,20 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getApiPasswordDecrypted() 
     {
-
         $password = Mage::getStoreConfig(self::API_PASSWORD);
 
         return Mage::helper('core')->decrypt($password);
-
     }
 
     /**
      * @return string
      */
-    public function getEndPointUrl() 
+    public function getEndPointUrl()
     {
-
         $url = Mage::getStoreConfig(self::END_POINT_URL);
 
         if ($url == 'custom') {
-            $url = Mage::getStoreConfig(self::CUSTOM_END_POINT_URL);
+            $url = Mage::getStoreConfig($this->pathCustomEndPointUrl);
         }
 
         $url .= substr($url, - 1) !== '/' ? '/' : '';
@@ -147,12 +135,10 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getRestApiUrl() 
     {
-
         $url = $this->getEndPointUrl();
         $url .= 'api/rest/version/' . self::API_VERSION . '/merchant/';
 
         return $url;
-
     }
 
     /**
@@ -162,12 +148,10 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getJsApiUrl() 
     {
-
         $url = $this->getEndPointUrl();
         $url .= 'checkout/version/' . self::API_VERSION . '/checkout.js';
 
         return $url;
-
     }
 
     /**
@@ -177,10 +161,8 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getWebhookSecret() 
     {
-
         $secret = Mage::getStoreConfig(self::WEBHOOK_SECRET);
         return Mage::helper('core')->decrypt($secret);
-
     }
 
     /**
@@ -190,23 +172,21 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getWebhookNotificationUrl() 
     {
-
         $webhookSecret = $this->getWebhookSecret();
         if (empty($webhookSecret)) {
             return;
         }
 
-        $url = Mage::getStoreConfig(self::WEBHOOK_URL);
+        $url = Mage::getStoreConfig($this->pathWebhookUrl);
         if (! empty($url)) {
             return $url;
         }
 
         return Mage::getUrl(
-            static::WEB_HOOK_UPDATE_URL, array (
+            self::WEB_HOOK_UPDATE_URL, array (
                 '_secure' => true
             ) 
         );
-
     }
 
     /**
@@ -216,9 +196,7 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getCurrency() 
     {
-
-        return Mage::getStoreConfig(self::CURRENCY);
-
+        return Mage::getStoreConfig($this->pathCurrency);
     }
 
     /**
@@ -228,8 +206,6 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function isDebugEnabled() 
     {
-
-        return Mage::getStoreConfig(self::DEBUG);
-
+        return Mage::getStoreConfig($this->pathDebug);
     }
 }

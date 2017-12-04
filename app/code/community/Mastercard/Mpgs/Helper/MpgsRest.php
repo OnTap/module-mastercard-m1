@@ -288,7 +288,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     public function buildOrderData( $quote ) 
     {
 
-        $config = Mage::getSingleton('mpgs/config');
+        $config = Mage::getSingleton('mpgs/config_hosted');
         $order ['amount'] = sprintf('%.2F', $quote->getGrandTotal());
         $order ['taxAmount'] = $quote->getShippingAddress()->getData('tax_amount');
         $order ['currency'] = $quote->getStore()->getBaseCurrencyCode();

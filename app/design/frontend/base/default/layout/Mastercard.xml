@@ -6,10 +6,9 @@
 		</reference>
 	</checkout_onepage_index>
 	<checkout_onepage_review>
-		<reference name="checkout.onepage.review.button">
-			<action method="setTemplate">
-				<template>Mastercard/review/button.phtml</template>
-			</action>
+		<reference name="checkout.onepage.review.info.items.after">
+            <block type="checkout/agreements" name="checkout.onepage.agreements" as="agreements" template="checkout/onepage/agreements.phtml"/>
+			<block type="mpgs/checkout_placeOrder" name="checkout.onepage.review.mastercard-place-order" template="Mastercard/checkout/placeOrder.phtml" />
 		</reference>
 	</checkout_onepage_review>
 </layout>

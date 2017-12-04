@@ -60,18 +60,21 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
     private $_resultCode = '';
 
     /**
-     *
-     * @param array $params
-     *
-     * @return Mastercard_Mpgs_Model_Method_Abstract
+     * @return string
      */
-    public function __construct( $params = array() ) 
+    public function getButtonRenderer()
     {
+        return 'mpgs/checkout_button_hosted';
+    }
 
-        parent::__construct($params);
-
-        return $this;
-
+    /**
+     * Return Mpgs config instance.
+     *
+     * @return Mastercard_Mpgs_Model_Config_Hosted
+     */
+    public function getConfig()
+    {
+        return Mage::getSingleton('mpgs/config_hosted');
     }
 
     /**

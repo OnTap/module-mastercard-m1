@@ -1,32 +1,26 @@
 <?xml version="1.0"?>
 <config>
-
 	<modules>
 		<Mastercard_Mpgs>
 			<version>1.0.2</version>
 		</Mastercard_Mpgs>
 	</modules>
-
 	<global>
-
 		<models>
 			<mpgs>
 				<class>Mastercard_Mpgs_Model</class>
 			</mpgs>
 		</models>
-
 		<blocks>
 			<mpgs>
 				<class>Mastercard_Mpgs_Block</class>
 			</mpgs>
 		</blocks>
-
 		<helpers>
 			<mpgs>
 				<class>Mastercard_Mpgs_Helper</class>
 			</mpgs>
 		</helpers>
-
 		<resources>
 			<Mastercard_mpgs_setup>
 				<setup>
@@ -34,7 +28,6 @@
 				</setup>
 			</Mastercard_mpgs_setup>
 		</resources>
-
 		<events>
 			<sales_order_payment_save_before>
 				<observers>
@@ -64,7 +57,6 @@
 				</observers>
 			</sales_order_load_after>
 		</events>
-
 		<Mastercard>
 			<transaction>
 				<types>
@@ -99,11 +91,8 @@
 				</other>
 			</endpoints>
 		</Mastercard>
-
 	</global>
-
 	<frontend>
-
 		<routers>
 			<checkout>
 				<args>
@@ -120,7 +109,6 @@
 				</args>
 			</webhook>
 		</routers>
-
 		<translate>
 			<modules>
 				<Mastercard_Mpgs>
@@ -130,7 +118,6 @@
 				</Mastercard_Mpgs>
 			</modules>
 		</translate>
-
 		<layout>
 			<updates>
 				<mpgs>
@@ -138,30 +125,35 @@
 				</mpgs>
 			</updates>
 		</layout>
-
 	</frontend>
-
 	<default>
-
 		<payment>
 			<Mastercard_hosted>
 				<model>mpgs/method_hosted</model>
 				<active>0</active>
 				<payment_action>authorize</payment_action>
 				<title>Credit Card</title>
-				<api_username />
-				<api_password />
+				<api_username/>
+				<api_password/>
 				<end_point_url>https://eu-gateway.mastercard.com/</end_point_url>
-				<webhook_secret />
-				<webhook_url />
+				<webhook_secret/>
+				<webhook_url/>
 				<debug>0</debug>
 				<test>0</test>
 				<order_status>processing</order_status>
-				<currency />
+				<currency/>
 				<allowspecific>0</allowspecific>
 			</Mastercard_hosted>
+			<Mastercard_amex>
+				<model>mpgs/method_amex</model>
+				<active>0</active>
+				<title>Amex Express Checkout</title>
+				<debug>0</debug>
+				<test>0</test>
+				<order_status>processing</order_status>
+				<currency/>
+				<allowspecific>0</allowspecific>
+			</Mastercard_amex>
 		</payment>
-
 	</default>
-
 </config>

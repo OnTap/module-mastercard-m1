@@ -62,7 +62,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
     protected function sender( $type, $method, $data ) 
     {
         /** @var Mastercard_Mpgs_Model_Config $config */
-        $config = Mage::getSingleton('mpgs/config');
+        $config = Mage::getSingleton('mpgs/config_hosted');
         $username = $config->getApiUsername();
         $password = $config->getApiPasswordDecrypted();
 
@@ -91,7 +91,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $resData = json_decode($response, true);
 
         /** @var Mastercard_Mpgs_Model_Logger $logger */
-        $logger = Mage::getSingleton('mpgs/logger');
+        $logger = Mage::getSingleton('mpgs/logger', array('config' => $config));
         $logger->logDebug(array(
             'url' => $url,
             'type' => $type,
