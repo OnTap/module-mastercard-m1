@@ -2,8 +2,10 @@
 /**
  * Copyright (c) 2017. On Tap Networks Limited.
  */
-class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abstract
+class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abstract implements Mastercard_Mpgs_Model_Method_WalletInterface
 {
+    const WALLET_CODE = 'AMEX_EXPRESS_CHECKOUT';
+
     const METHOD_NAME = 'Mastercard_amex';
     protected $_code = self::METHOD_NAME;
 
@@ -43,5 +45,30 @@ class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abs
     public function getButtonRenderer()
     {
         return 'mpgs/checkout_button_amex';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function openWallet(Mage_Sales_Model_Quote_Payment $payment, Varien_Object $data)
+    {
+        /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
+        $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
+
+        $session = $payment->getAdditionalInformation('session');
+        $quote = $payment->getQuote();
+
+        try {
+            $wallet = $restAPI->openWallet($session, $quote, self::WALLET_CODE);
+            $data->addData(array(
+                'wallet' => array(
+                    // ...
+                )
+            ));
+        } catch (Exception $e) {
+            $data->addData(array(
+                'exception' => $e->getMessage()
+            ));
+        }
     }
 }

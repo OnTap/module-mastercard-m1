@@ -313,6 +313,31 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * @param Mage_Sales_Model_Quote $quote
+     * @param string $type
+     * @return array
+     */
+    public function buildWalletData($quote, $type)
+    {
+        return array(
+            'amount' => sprintf('%.2F', $quote->getGrandTotal()),
+            'currency' => $quote->getStore()->getBaseCurrencyCode(),
+            'walletProvider' => $type
+        );
+    }
+
+    /**
+     * @param array $session
+     * @return array
+     */
+    public function buildSessionVersionData($session)
+    {
+        return array(
+            'version' => $session['session']['version']
+        );
+    }
+
+    /**
      * Return a label for the supplied key
      *
      * Used to transpose object data keys to correct UI labels and also add

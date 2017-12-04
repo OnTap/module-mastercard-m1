@@ -59,7 +59,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * @return array
      * @throws Mage_Core_Exception
      */
-    protected function sender( $type, $method, $data ) 
+    protected function sender( $type, $method, $data = null )
     {
         /** @var Mastercard_Mpgs_Model_Config $config */
         $config = Mage::getSingleton('mpgs/config_hosted');
@@ -70,16 +70,19 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_USERPWD, "merchant." . $username . ":" . $password);
 
-        $payload = json_encode($data);
-        switch ($type) {
-            case self::MPGS_POST :
-                curl_setopt($ch, CURLOPT_POST, 1);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-                break;
-            case self::MPGS_PUT :
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-                break;
+        $payload = '';
+        if ($data) {
+            $payload = json_encode($data);
+            switch ($type) {
+                case self::MPGS_POST :
+                    curl_setopt($ch, CURLOPT_POST, 1);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+                    break;
+                case self::MPGS_PUT :
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+                    break;
+            }
         }
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -120,7 +123,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      */
     public function create_checkout_session( $mpgs_id, $quote ) 
     {
-
+        /** @var Mastercard_Mpgs_Helper_MpgsRest $rest */
         $rest = Mage::helper('mpgs/mpgsRest');
         $data ['apiOperation'] = 'CREATE_CHECKOUT_SESSION';
         $data ['transaction'] = $rest->buildTransactionData();
@@ -139,6 +142,35 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 
         return $resData;
 
+    }
+
+    /**
+     * @param array $session
+     * @param Mage_Sales_Model_Quote $quote
+     * @param string $type
+     * @return array
+     */
+    public function openWallet($session, $quote, $type)
+    {
+        /** @var Mastercard_Mpgs_Helper_MpgsRest $rest */
+        $rest = Mage::helper('mpgs/mpgsRest');
+
+        $data = array();
+        $data['order'] = $rest->buildWalletData($quote, $type);
+        $data['session'] = $rest->buildSessionVersionData($session);
+
+        return $this->sender(self::MPGS_POST, 'session/' . $session['session']['id'], $data);
+    }
+
+    /**
+     * @return array
+     */
+    public function createSession()
+    {
+        $resData = $this->sender(self::MPGS_POST, 'session', array(
+            'correlationId' => null
+        ));
+        return $resData;
     }
 
     /**

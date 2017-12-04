@@ -31,7 +31,7 @@
  */
 class Mastercard_Mpgs_Model_Config extends Varien_Object
 {
-    const API_VERSION = '35';
+    const API_VERSION = '45';
     const WEB_HOOK_UPDATE_URL = 'mastercard/webhook/update';
     const TRANSACTION_TYPES = 'global/Mastercard/transaction/types';
     const END_POINTS = 'global/Mastercard/endpoints';

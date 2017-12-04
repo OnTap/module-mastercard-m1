@@ -4,6 +4,9 @@
  */
 class Mastercard_Mpgs_Block_Checkout_Button_Hosted extends Mastercard_Mpgs_Block_Checkout_Button_AbstractButton
 {
+    /**
+     * Construct
+     */
     public function _construct()
     {
         $this->setTemplate('Mastercard/checkout/button/hosted.phtml');

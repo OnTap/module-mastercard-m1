@@ -1,3 +1,32 @@
 <?php /** @var Mastercard_Mpgs_Block_Checkout_Button_AbstractButton $this */ ?>
 
-<button type="submit" title="<?php echo $this->__('Place Order') ?>" class="button btn-checkout"><?php echo $this->__('Place Order') ?></button>
+<button id="amex_session_create" type="submit" title="<?php echo $this->__('Place Order') ?>" class="button btn-checkout"><?php echo $this->__('Place Order') ?></button>
+
+<script type="text/javascript">
+    var AmexCheckout = Class.create();
+    AmexCheckout.prototype = {
+        config: {},
+
+        initialize: function (elem, url) {
+            this.config.url = url;
+            $(elem).observe('click', this.createSession.bind(this));
+        },
+
+        createSession: function () {
+            new Ajax.Request(this.config.url, {
+                onSuccess: this.didCreateSession.bind(this),
+                onFailure: this.didFail.bind(this)
+            })
+        },
+
+        didCreateSession: function () {
+            console.log('session created', arguments);
+        },
+
+        didFail: function () {
+            console.error('Failed creating session');
+        }
+    };
+
+    new AmexCheckout('amex_session_create', '<?php echo Mage::getUrl('mastercard/session/create') ?>');
+</script>

@@ -29,6 +29,15 @@
 			</Mastercard_mpgs_setup>
 		</resources>
 		<events>
+			<mpgs_create_session_after>
+				<observers>
+					<open_wallet>
+						<type>model</type>
+						<class>mpgs/observer_wallet</class>
+						<method>openWallet</method>
+					</open_wallet>
+				</observers>
+			</mpgs_create_session_after>
 			<sales_order_payment_save_before>
 				<observers>
 					<mastercard_mpgs_model_observer>
