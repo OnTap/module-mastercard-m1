@@ -7,7 +7,7 @@ class Mastercard_Mpgs_SessionController extends Mage_Core_Controller_Front_Actio
     /**
      * Action
      */
-    public function createAction()
+    public function walletAction()
     {
         $returnData = new Varien_Object();
 
@@ -18,11 +18,10 @@ class Mastercard_Mpgs_SessionController extends Mage_Core_Controller_Front_Actio
         $payment = $this->getQuote()->getPayment();
         $payment->setAdditionalInformation('session', $session);
 
-        Mage::dispatchEvent('mpgs_create_session_after', array(
-            'session' => $session,
-            'payment' => $payment,
-            'return_data' => $returnData
-        ));
+        $method = $payment->getMethodInstance();
+        if ($method instanceof Mastercard_Mpgs_Model_Method_WalletInterface) {
+            $payment->getMethodInstance()->openWallet($payment, $returnData);
+        }
 
         if ($returnData->getException()) {
             $this->getResponse()->setHttpResponseCode(503);

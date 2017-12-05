@@ -1,6 +1,8 @@
-<?php /** @var Mastercard_Mpgs_Block_Checkout_Button_AbstractButton $this */ ?>
+<?php /** @var Mastercard_Mpgs_Block_Checkout_Button_Amex $this */ ?>
 
-<button id="amex_session_create" type="submit" title="<?php echo $this->__('Place Order') ?>" class="button btn-checkout"><?php echo $this->__('Place Order') ?></button>
+<button id="amex_session_create" type="submit" title="<?php echo $this->__('Place Order') ?>" class="button btn-checkout">
+    <span><?php echo $this->__('Place Order') ?></span>
+</button>
 
 <script type="text/javascript">
     var AmexCheckout = Class.create();
@@ -23,10 +25,12 @@
             console.log('session created', arguments);
         },
 
-        didFail: function () {
-            console.error('Failed creating session');
+        didFail: function (transport) {
+            if (transport.responseJSON.exception) {
+                console.error('Backend exception: %s', transport.responseJSON.exception);
+            }
+            alert('<?php echo $this->__("Unable to load Amex Express Checkout, please try again later.") ?>');
         }
     };
-
-    new AmexCheckout('amex_session_create', '<?php echo Mage::getUrl('mastercard/session/create') ?>');
+    new AmexCheckout('amex_session_create', '<?php echo Mage::getUrl('mastercard/session/wallet') ?>');
 </script>

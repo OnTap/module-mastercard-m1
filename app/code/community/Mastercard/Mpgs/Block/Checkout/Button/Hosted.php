@@ -12,4 +12,12 @@ class Mastercard_Mpgs_Block_Checkout_Button_Hosted extends Mastercard_Mpgs_Block
         $this->setTemplate('Mastercard/checkout/button/hosted.phtml');
         parent::_construct();
     }
+
+    /**
+     * @return string
+     */
+    public function getJsAction()
+    {
+        return sprintf("showMpgsLightbox('%s');", $this->getQuote()->getId());
+    }
 }

@@ -5,15 +5,23 @@
 class Mastercard_Mpgs_Block_Checkout_PlaceOrder extends Mage_Payment_Block_Form_Cc
 {
     /**
+     * @return Mage_Sales_Model_Quote
+     */
+    public function getQuote()
+    {
+        return Mage::getSingleton('checkout/type_onepage')->getQuote();
+    }
+
+    /**
      * Set method info
      *
      * @return $this
      */
     public function setMethodInfo()
     {
-        $payment = Mage::getSingleton('checkout/type_onepage')
-            ->getQuote()
+        $payment = $this->getQuote()
             ->getPayment();
+
         $this->setMethod($payment->getMethodInstance());
 
         return $this;
@@ -32,7 +40,14 @@ class Mastercard_Mpgs_Block_Checkout_PlaceOrder extends Mage_Payment_Block_Form_
             return '';
         }
 
-        $block = $this->getLayout()->createBlock($renderer, $this->getNameInLayout() . '.renderer');
+        $block = $this->getLayout()->createBlock(
+            $renderer,
+            $this->getNameInLayout() . '.renderer',
+            array(
+                'quote' => $this->getQuote()
+            )
+        );
+
         if (!$block) {
             throw new Exception(sprintf('MPGS renderer block class "%s" not found', $renderer));
         }
