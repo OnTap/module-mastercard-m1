@@ -69,4 +69,69 @@ class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abs
             ));
         }
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function updateSessionFromWallet(Mage_Sales_Model_Quote_Payment $payment, Varien_Object $params)
+    {
+        /** @var Mastercard_Mpgs_Helper_MpgsRest $rest */
+        $rest = Mage::helper('mpgs/mpgsRest');
+
+        /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
+        $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
+        $response = $restAPI->updateSessionFromWallet($params, $payment->getQuote());
+
+        $rest->addCardInfo($payment, $response);
+        $rest->addWallet($payment, $response);
+        $rest->addSession($payment, $response);
+    }
+
+    /**
+     * @return string
+     */
+    public function getConfigPaymentAction()
+    {
+        // @todo: Take this from provider?
+        return Mage_Payment_Model_Method_Abstract::ACTION_AUTHORIZE;
+    }
+
+    /**
+     * Authorise the payment.
+     * This method is called when auth mode is selected.
+     *
+     * @param Varien_Object $payment
+     * @param string $amount
+     * @return $this
+     */
+    public function authorize( Varien_Object $payment, $amount )
+    {
+        parent::authorize($payment, $amount);
+
+        /** @var Mastercard_Mpgs_Model_Method_WalletInterface|Mastercard_Mpgs_Model_Method_Abstract $method */
+        $method = $payment->getMethodInstance();
+        $info = $method->getInfoInstance();
+
+        /** @var Mage_Sales_Model_Order $order */
+        $order = $info->getOrder();
+
+        /** @var Mastercard_Mpgs_Helper_MpgsRest $helper */
+        $helper = Mage::helper('mpgs/mpgsRest');
+
+        /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
+        $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
+
+        $response = $restAPI->authorizeFromSession($order);
+
+//        $mpgs_id = $payment->getAdditionalInformation('mpgs_id');
+//        $orderInfo = $restAPI->retrieve_order($mpgs_id);
+//        $helper->updatePaymentInfo($payment, $orderInfo);
+//
+//        $authTxnInfo = $helper->searchTxnByType($orderInfo, 'AUTHORIZATION');
+//
+//        $helper->updateTransferInfo($payment, $authTxnInfo);
+//        $helper->addAuthTxnPayment($payment, $authTxnInfo, false);
+
+        return $this;
+    }
 }

@@ -104,9 +104,16 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 
         if (isset($resData['result']) && $resData['result'] !== 'SUCCESS') {
             $this->_critical(Mage_Api2_Model_Resource::RESOURCE_INTERNAL_ERROR);
-            $e =  new Mage_Core_Exception($resData['error']['explanation']);
-            Mage::logException($e);
-            throw $e;
+            if (isset($resData['error']['explanation'])) {
+                $e = new Mage_Core_Exception($resData['error']['explanation']);
+                Mage::logException($e);
+                throw $e;
+            }
+            if (isset($resData['response']['gatewayCode'])) {
+                $e = new Mage_Core_Exception($resData['response']['gatewayCode']);
+                Mage::logException($e);
+                throw $e;
+            }
         }
 
         return $resData;
@@ -131,7 +138,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data ['customer'] = $rest->buildCustomerData($quote);
         $data ['billing'] = $rest->buildBillingData($quote);
         $data ['shipping'] = $rest->buildShippingData($quote);
-        $data ['order'] = $rest->buildOrderData($quote);
+        $data ['order'] = $rest->buildOrderDataFromQuote($quote);
         $data ['order'] ['id'] = $mpgs_id;
 
         $resData = $this->sender(self::MPGS_POST, 'session', $data);
@@ -171,6 +178,52 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
             'correlationId' => null
         ));
         return $resData;
+    }
+
+    /**
+     * @param Varien_Object $params
+     * @param Mage_Sales_Model_Quote $quote
+     * @return array
+     */
+    public function updateSessionFromWallet(Varien_Object $params, Mage_Sales_Model_Quote $quote)
+    {
+        /** @var Mastercard_Mpgs_Helper_MpgsRest $rest */
+        $rest = Mage::helper('mpgs/mpgsRest');
+
+        $data = array();
+        $data['apiOperation'] = 'UPDATE_SESSION_FROM_WALLET';
+        $data['order'] = $rest->buildWalletData($quote, Mastercard_Mpgs_Model_Method_Amex::WALLET_CODE);
+        $data['wallet'] = $rest->aecDataBulder($params);
+
+        $session = $quote->getPayment()->getAdditionalInformation('session');
+
+        return $this->sender(self::MPGS_POST, 'session/' . $session['session']['id'], $data);
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order $order
+     * @return array
+     */
+    public function authorizeFromSession(Mage_Sales_Model_Order $order)
+    {
+        $orderId = $order->getIncrementId();
+
+        /** @var Mastercard_Mpgs_Helper_MpgsRest $rest */
+        $rest = Mage::helper('mpgs/mpgsRest');
+
+        $data = array(
+            'apiOperation' => 'AUTHORIZE'
+        );
+
+        $data['customer'] = $rest->buildCustomerData($order);
+        $data['billing'] = $rest->buildBillingData($order);
+        $data['shipping'] = $rest->buildShippingData($order);
+        $data['order'] = $rest->buildOrderDataFromOrder($order);
+        $data['session'] = $rest->buildSessionData($order->getPayment()->getAdditionalInformation('session'));
+        $data['sourceOfFunds'] = $rest->buildSourceOfFunds();
+
+        $txnId = uniqid(sprintf('%s-', $orderId));
+        return $this->sender(self::MPGS_PUT, 'order/' . $orderId . '/transaction/' . $txnId, $data);
     }
 
     /**

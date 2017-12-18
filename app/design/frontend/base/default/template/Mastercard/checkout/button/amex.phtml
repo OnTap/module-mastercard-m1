@@ -60,7 +60,7 @@
             if (transport.responseJSON.exception) {
                 console.error('Backend exception: %s', transport.responseJSON.exception);
             }
-            alert('<?php echo $this->__("Unable to load Amex Express Checkout, please try again later.") ?>');
+            alert('<?php echo $this->__("Error in Amex Express Checkout, please try again later.") ?>');
         },
 
         aecCallbackHandler: function (response) {
@@ -81,6 +81,10 @@
         },
 
         didCompleteOrder: function (response) {
+            if (!response.responseJSON.success_url) {
+                console.error('Backend exception: Return Data does not contain success URL');
+                alert('<?php echo $this->__('Something went wrong, please try again later.') ?>');
+            }
             location.href = response.responseJSON.success_url;
         }
     };

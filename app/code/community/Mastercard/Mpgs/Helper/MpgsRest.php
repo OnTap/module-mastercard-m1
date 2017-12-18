@@ -37,6 +37,23 @@
  */
 class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
 {
+    /**
+     * @param Mage_Sales_Model_Quote_Payment $payment
+     * @param array $data
+     */
+    public function addWallet(Mage_Sales_Model_Quote_Payment $payment, $data)
+    {
+        $payment->setAdditionalInformation('wallet', $data['wallet']);
+    }
+
+    /**
+     * @param Mage_Sales_Model_Quote_Payment $payment
+     * @param array $data
+     */
+    public function addSession(Mage_Sales_Model_Quote_Payment $payment, $data)
+    {
+        $payment->setAdditionalInformation('session', $data['session']);
+    }
 
     /**
      * Verifies if a field exist in the data array otherwise return null
@@ -200,7 +217,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      *
      * Build a create checkout session Customer block.
      *
-     * @param Mage_Sales_Model_Quote $quote
+     * @param Mage_Sales_Model_Quote|Mage_Sales_Model_Order $quote
      *
      * @return array
      */
@@ -221,7 +238,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      *
      * Build a create checkout session Billing block.
      *
-     * @param Mage_Sales_Model_Quote $quote
+     * @param Mage_Sales_Model_Quote|Mage_Sales_Model_Order $quote
      *
      * @return array
      */
@@ -249,7 +266,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      *
      * Build a create checkout session Shipping block.
      *
-     * @param Mage_Sales_Model_Quote $quote
+     * @param Mage_Sales_Model_Quote|Mage_Sales_Model_Order $quote
      *
      * @return array
      */
@@ -278,32 +295,63 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Build order array
      *
+     * @param Mage_Sales_Model_Order $order
+     * @return array
+     */
+    public function buildOrderDataFromOrder($order)
+    {
+        $data = array();
+
+        $data['amount'] = sprintf('%.2F', $order->getGrandTotal());
+        $data['taxAmount'] = number_format($order->getTaxAmount(), 2);
+        $data['currency'] = $order->getBaseCurrencyCode();
+        $data['shippingAndHandlingAmount'] = number_format($order->getShippingAmount(), 2);
+        $data['description'] = 'Magento Order';
+        $data['reference'] = $order->getIncrementId();
+        $data['item'] = array();
+
+        /** @var Mage_Sales_Model_Order_Item $item */
+        foreach ($order->getAllItems() as $item) {
+            $iteminfo['name'] = $item->getName();
+            $iteminfo['description'] = $item->getDescription();
+            $iteminfo['sku'] = $item->getSku();
+            $iteminfo['unitPrice'] = sprintf('%.2F', $item->getRowTotal() - $item->getDiscountAmount());
+            $iteminfo['quantity'] = $item->getQtyOrdered();
+
+            $data['item'][] = $iteminfo;
+        }
+
+        return $data;
+    }
+
+    /**
      * Build a create checkout session Order block.
      *
      * @param Mage_Sales_Model_Quote $quote
-     *
      * @return array
      */
-    public function buildOrderData( $quote ) 
+    public function buildOrderDataFromQuote( $quote )
     {
 
         $config = Mage::getSingleton('mpgs/config_hosted');
         $order ['amount'] = sprintf('%.2F', $quote->getGrandTotal());
-        $order ['taxAmount'] = $quote->getShippingAddress()->getData('tax_amount');
+        $order ['taxAmount'] = number_format($quote->getShippingAddress()->getData('tax_amount'), 2);
         $order ['currency'] = $quote->getStore()->getBaseCurrencyCode();
-        $order ['shippingAndHandlingAmount'] = $quote->getShippingAddress()->getShippingAmount();
+        $order ['shippingAndHandlingAmount'] = number_format($quote->getShippingAddress()->getShippingAmount(), 2);
         $order ['description'] = 'Magento Order';
         $order ['notificationUrl'] = $config->getWebhookNotificationUrl();
         $order ['reference'] = $quote->getReservedOrderId();
         $i = 0;
 
+        /** @var Mage_Sales_Model_Quote_Item $item */
         foreach ($quote->getAllItems() as $item) {
             $iteminfo ['name'] = $item->getName();
             $iteminfo ['description'] = $item->getDescription();
             $iteminfo ['sku'] = $item->getSku();
             $iteminfo ['unitPrice'] = sprintf('%.2F', $item->getRowTotal() - $item->getDiscountAmount());
-            $iteminfo ['quantity'] = 1;
+            $iteminfo ['quantity'] = $item->getQty();
             $order ['item'] [$i] = $iteminfo;
             ++ $i;
         }
@@ -327,6 +375,32 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * @param Varien_Object $params
+     * @return array
+     */
+    public function aecDataBulder($params)
+    {
+        return array(
+            'amexExpressCheckout' => array(
+                'authCode' => $params->getData('auth_code'),
+                'transactionId' => $params->getData('transaction_id'),
+                'walletId' => $params->getData('wallet_id'),
+                'selectedCardType' => $params->getData('card_type')
+            )
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function buildSourceOfFunds()
+    {
+        return array(
+            'type' => 'CARD'
+        );
+    }
+
+    /**
      * @param array $session
      * @return array
      */
@@ -334,6 +408,17 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     {
         return array(
             'version' => $session['session']['version']
+        );
+    }
+
+    /**
+     * @param array $session
+     * @return array
+     */
+    public function buildSessionData($session)
+    {
+        return array(
+            'id' => $session['id']
         );
     }
 
