@@ -85,6 +85,10 @@
 					<name>North America</name>
 					<url>https://na-gateway.mastercard.com/</url>
 				</northamerica>
+				<australia>
+					<name>Australia</name>
+					<url>https://mtf.gateway.mastercard.com/</url>
+				</australia>
 				<other>
 					<name>Other</name>
 					<url>custom</url>
@@ -153,6 +157,7 @@
 				<order_status>processing</order_status>
 				<currency/>
 				<allowspecific>0</allowspecific>
+				<component_url>https://icm.aexp-static.com/Internet/IMDC/US_en/RegisteredCard/IntlAmexExpressCheckout/js/AmexExpressCheckout.js</component_url>
 			</Mastercard_amex>
 		</payment>
 	</default>

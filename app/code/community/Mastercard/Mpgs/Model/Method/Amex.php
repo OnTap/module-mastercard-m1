@@ -61,9 +61,7 @@ class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abs
         try {
             $wallet = $restAPI->openWallet($session, $quote, self::WALLET_CODE);
             $data->addData(array(
-                'wallet' => array(
-                    // ...
-                )
+                'wallet' => $wallet['wallet']
             ));
         } catch (Exception $e) {
             $data->addData(array(

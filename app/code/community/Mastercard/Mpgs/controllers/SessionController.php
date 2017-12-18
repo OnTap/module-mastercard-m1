@@ -18,9 +18,10 @@ class Mastercard_Mpgs_SessionController extends Mage_Core_Controller_Front_Actio
         $payment = $this->getQuote()->getPayment();
         $payment->setAdditionalInformation('session', $session);
 
+        /** @var Mastercard_Mpgs_Model_Method_WalletInterface $method */
         $method = $payment->getMethodInstance();
         if ($method instanceof Mastercard_Mpgs_Model_Method_WalletInterface) {
-            $payment->getMethodInstance()->openWallet($payment, $returnData);
+            $method->openWallet($payment, $returnData);
         }
 
         if ($returnData->getException()) {
@@ -29,8 +30,9 @@ class Mastercard_Mpgs_SessionController extends Mage_Core_Controller_Front_Actio
 
         $this->getQuote()->save();
 
-        $this->getResponse()->setHeader('Content-Type', 'application/json');
-        $this->getResponse()->setBody(json_encode($returnData->toArray()));
+        $this->_prepareDataJSON(
+            $returnData->toArray()
+        );
     }
 
     /**
@@ -39,5 +41,17 @@ class Mastercard_Mpgs_SessionController extends Mage_Core_Controller_Front_Actio
     public function getQuote()
     {
         return Mage::getSingleton('checkout/type_onepage')->getQuote();
+    }
+
+    /**
+     * Prepare JSON formatted data for response to client
+     *
+     * @param $response
+     * @return Zend_Controller_Response_Abstract
+     */
+    protected function _prepareDataJSON($response)
+    {
+        $this->getResponse()->setHeader('Content-type', 'application/json', true);
+        return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
     }
 }

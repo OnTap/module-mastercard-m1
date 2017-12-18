@@ -1,28 +1,59 @@
 <?php /** @var Mastercard_Mpgs_Block_Checkout_Button_Amex $this */ ?>
-
-<button id="amex_session_create" type="submit" title="<?php echo $this->__('Place Order') ?>" class="button btn-checkout">
-    <span><?php echo $this->__('Place Order') ?></span>
-</button>
-
+<div id="amex-express-checkout"></div>
 <script type="text/javascript">
     var AmexCheckout = Class.create();
     AmexCheckout.prototype = {
         config: {},
 
-        initialize: function (elem, url) {
-            this.config.url = url;
-            $(elem).observe('click', this.createSession.bind(this));
+        initialize: function (config) {
+            this.config = config;
+            if (window.payment.currentMethod === 'Mastercard_amex') {
+                this.loadAdapter();
+
+                new MutationObserver(this.adapterLoaded)
+                    .observe($('amex-express-checkout'), { childList: true });
+            }
         },
 
-        createSession: function () {
-            new Ajax.Request(this.config.url, {
+        loadAdapter: function (event) {
+            window.aecCallbackHandler = this.aecCallbackHandler.bind(this);
+
+            new Ajax.Request(this.config.session_url, {
                 onSuccess: this.didCreateSession.bind(this),
-                onFailure: this.didFail.bind(this)
+                onFailure: this.didFail.bind(this),
+                onLoading: function () {
+                    $('mpgs-loading').show();
+                }
             })
         },
 
-        didCreateSession: function () {
-            console.log('session created', arguments);
+        didCreateSession: function (response) {
+            var config = response.responseJSON;
+
+            // Cleanup any previous tags
+            $A(document.getElementsByTagName('amex:init')).each(function (item) {
+                item.remove();
+            });
+
+            var amex = new Element('amex:init', {
+                client_id: this.config.client_id,
+                theme: 'responsive',
+                env: this.config.env,
+                callback: 'aecCallbackHandler'
+            });
+
+            var amexBuy = new Element('amex:buy', {
+                encrypted_data: config.wallet.amexExpressCheckout.encryptedData
+            });
+
+            amex.insert(amexBuy);
+            document.body.insert(amex);
+
+            var loader = new Element('script', {
+                type: 'text/javascript',
+                src: this.config.component_url
+            });
+            document.body.insert(loader);
         },
 
         didFail: function (transport) {
@@ -30,7 +61,28 @@
                 console.error('Backend exception: %s', transport.responseJSON.exception);
             }
             alert('<?php echo $this->__("Unable to load Amex Express Checkout, please try again later.") ?>');
+        },
+
+        aecCallbackHandler: function (response) {
+            new Ajax.Request(this.config.place_order_url, {
+                method: 'post',
+                parameters: $H(response),
+                onSuccess: this.didCompleteOrder.bind(this),
+                onFailure: this.didFail.bind(this),
+                onLoading: function () {
+                    $('amex-express-checkout').hide();
+                    $('mpgs-please-wait').show();
+                }
+            });
+        },
+
+        adapterLoaded: function () {
+            $('mpgs-loading').hide();
+        },
+
+        didCompleteOrder: function (response) {
+            location.href = response.responseJSON.success_url;
         }
     };
-    new AmexCheckout('amex_session_create', '<?php echo Mage::getUrl('mastercard/session/wallet') ?>');
+    new AmexCheckout(<?php echo $this->getJsConfig() ?>);
 </script>

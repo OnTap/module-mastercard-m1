@@ -190,7 +190,7 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
     }
 
     /**
-     * Retrieve Suported Currency.
+     * Retrieve Supported Currency.
      *
      * @return string
      */

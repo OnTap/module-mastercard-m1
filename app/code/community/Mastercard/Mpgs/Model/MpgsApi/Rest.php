@@ -102,7 +102,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
             'response' => $response
         ));
 
-        if ($resData['result'] !== 'SUCCESS') {
+        if (isset($resData['result']) && $resData['result'] !== 'SUCCESS') {
             $this->_critical(Mage_Api2_Model_Resource::RESOURCE_INTERNAL_ERROR);
             $e =  new Mage_Core_Exception($resData['error']['explanation']);
             Mage::logException($e);

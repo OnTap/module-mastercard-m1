@@ -234,6 +234,15 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>0</show_in_store>
 						</active>
+						<client_id translate="label">
+							<label>Client ID</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>0</show_in_store>
+							<comment>MSO Client Id from the Amex Express Checkout Configuration page in Merchant Administration</comment>
+						</client_id>
                         <test translate="label">
                             <label>Test Mode</label>
                             <frontend_type>select</frontend_type>
