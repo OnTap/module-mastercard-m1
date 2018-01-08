@@ -1,4 +1,4 @@
-<?php /** @var Mastercard_Mpgs_Block_Checkout_Button_Amex $this */ ?>
+<?php /** @var Mastercard_Mpgs_Block_Checkout_Button_Amex_Direct $this */ ?>
 <div id="amex-express-checkout"></div>
 <script type="text/javascript">
     var AmexCheckout = Class.create();
@@ -15,7 +15,7 @@
             }
         },
 
-        loadAdapter: function (event) {
+        loadAdapter: function () {
             window.aecCallbackHandler = this.aecCallbackHandler.bind(this);
 
             new Ajax.Request(this.config.session_url, {

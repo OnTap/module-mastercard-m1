@@ -2,14 +2,14 @@
 /**
  * Copyright (c) 2017. On Tap Networks Limited.
  */
-class Mastercard_Mpgs_Block_Checkout_Button_Amex extends Mastercard_Mpgs_Block_Checkout_Button_AbstractButton
+class Mastercard_Mpgs_Block_Checkout_Button_Amex_Direct extends Mastercard_Mpgs_Block_Checkout_Button_AbstractButton
 {
     /**
      * Construct
      */
     public function _construct()
     {
-        $this->setTemplate('Mastercard/checkout/button/amex.phtml');
+        $this->setTemplate('Mastercard/checkout/button/amex/direct.phtml');
         parent::_construct();
     }
 
@@ -23,7 +23,7 @@ class Mastercard_Mpgs_Block_Checkout_Button_Amex extends Mastercard_Mpgs_Block_C
             'session_url' => Mage::getUrl('mastercard/session/wallet', array('_secure' => true)),
             'client_id' => $this->getConfig()->getClientId(),
             'env' => $this->getConfig()->getEnv(),
-            'place_order_url' => Mage::getUrl('mastercard/amex/placeOrder', array('_secure' => true)),
+            'place_order_url' => Mage::getUrl('mastercard/amex_direct/placeOrder', array('_secure' => true)),
         ));
     }
 

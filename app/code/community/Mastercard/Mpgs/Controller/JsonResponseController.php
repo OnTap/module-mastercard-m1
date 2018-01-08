@@ -16,4 +16,24 @@ abstract class Mastercard_Mpgs_Controller_JsonResponseController extends Mage_Co
         $this->getResponse()->setHeader('Content-type', 'application/json', true);
         return $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
     }
+
+    /**
+     * Get one page checkout model
+     *
+     * @return Mage_Checkout_Model_Type_Onepage
+     */
+    public function getOnepage()
+    {
+        return Mage::getSingleton('checkout/type_onepage');
+    }
+
+    /**
+     * Get checkout session model instance
+     *
+     * @return Mage_Checkout_Model_Session
+     */
+    public function getSession()
+    {
+        return Mage::getSingleton('checkout/session');
+    }
 }

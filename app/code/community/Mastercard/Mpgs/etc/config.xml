@@ -150,6 +150,7 @@
 			</Mastercard_hosted>
 			<Mastercard_amex>
 				<model>mpgs/method_amex</model>
+				<provider>direct</provider>
 				<active>0</active>
 				<title>Amex Express Checkout</title>
 				<debug>0</debug>

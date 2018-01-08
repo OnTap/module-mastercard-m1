@@ -1,0 +1,103 @@
+<?php /** @var Mastercard_Mpgs_Block_Checkout_Button_Amex_Hpf $this */ ?>
+<div id="amex-express-checkout"></div>
+<script type="text/javascript">
+    var AmexCheckout = Class.create();
+    AmexCheckout.prototype = {
+        config: {},
+
+        initialize: function (config) {
+            this.config = config;
+            if (window.payment.currentMethod === 'Mastercard_amex') {
+                this.loadAdapter();
+
+                new MutationObserver(this.adapterLoaded)
+                    .observe($('amex-express-checkout'), { childList: true });
+            }
+        },
+
+        loadAdapter: function () {
+            $('mpgs-loading').show();
+
+            var cacheBust = new Date().getTime(),
+                url = this.config.component_url;
+
+            if (this.config.debug === '1') {
+                url += '?debug=1&_=' + cacheBust;
+            } else {
+                url += '?_=' + cacheBust;
+            }
+
+            var loader = new Element('script', {
+                type: 'text/javascript',
+                async: true,
+                src: url
+            });
+            document.body.insert(loader);
+
+            this.waitUntilReady(function () {
+                this.debug('session.js loaded, configuring...');
+                PaymentSession.configure({
+                    frameEmbeddingMitigation: ['x-frame-options'],
+                    wallets: {
+                        amexExpressCheckout: {
+                            enabled: true,
+                            initTags: {
+                                theme: 'responsive',
+                                env: this.config.env,
+                                disable_btn: 'false',
+                                client_id: this.config.client_id
+                            }
+                        }
+                    },
+                    order: {
+                        amount: this.config.grand_total,
+                        currency: this.config.currency
+                    },
+                    callbacks: {
+                        initialized: this.aecInitialized.bind(this),
+                        amexExpressCheckout: this.aecInteractionFinished.bind(this)
+                    }
+                });
+            }.bind(this));
+        },
+
+        aecInitialized: function (response) {
+            this.debug('AEC initialised', response);
+            if (response.status !== 'ok') {
+                alert('Amex Express Checkout failed to initialise, please try again later.');
+            }
+        },
+
+        aecInteractionFinished: function (response) {
+            this.debug('AEC interaction completed', response);
+            if (response.status !== 'ok' || !response.session) {
+                alert('Unexpected AEC status, please try again later.');
+            } else {
+                $('amex-express-checkout').hide();
+                $('mpgs-please-wait').show();
+                window.location.href = this.config.place_order_url + '?' + Object.toQueryString(response.session);
+            }
+        },
+
+        debug: function () {
+            if (this.config.debug === '1') {
+                console.log.apply(this, arguments);
+            }
+        },
+
+        waitUntilReady: function (callback) {
+            setTimeout(function() {
+                if (typeof PaymentSession !== 'undefined') {
+                    callback();
+                } else {
+                    this.waitUntilReady(callback);
+                }
+            }.bind(this), 200);
+        },
+
+        adapterLoaded: function () {
+            $('mpgs-loading').hide();
+        }
+    };
+    new AmexCheckout(<?php echo $this->getJsConfig() ?>);
+</script>

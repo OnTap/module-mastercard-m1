@@ -57,7 +57,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * @param array $data
      *
      * @return array
-     * @throws Mage_Core_Exception
+     * @throws Exception
      */
     protected function sender( $type, $method, $data = null )
     {
@@ -102,18 +102,13 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
             'response' => $response
         ));
 
-        if (isset($resData['result']) && $resData['result'] !== 'SUCCESS') {
-            $this->_critical(Mage_Api2_Model_Resource::RESOURCE_INTERNAL_ERROR);
-            if (isset($resData['error']['explanation'])) {
-                $e = new Mage_Core_Exception($resData['error']['explanation']);
-                Mage::logException($e);
-                throw $e;
-            }
-            if (isset($resData['response']['gatewayCode'])) {
-                $e = new Mage_Core_Exception($resData['response']['gatewayCode']);
-                Mage::logException($e);
-                throw $e;
-            }
+        try {
+            /** @var Mastercard_Mpgs_Model_MpgsApi_Validator $validator */
+            $validator = Mage::getModel('mpgs/mpgsApi_validator');
+            $validator->validate($resData);
+        } catch (Exception $e) {
+            Mage::logException($e);
+            throw $e;
         }
 
         return $resData;

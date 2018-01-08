@@ -44,7 +44,7 @@ class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abs
      */
     public function getButtonRenderer()
     {
-        return 'mpgs/checkout_button_amex';
+        return $this->getConfig()->getRendererBlock();
     }
 
     /**
@@ -104,7 +104,7 @@ class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abs
      * @param string $amount
      * @return $this
      */
-    public function authorize( Varien_Object $payment, $amount )
+    public function authorize(Varien_Object $payment, $amount)
     {
         parent::authorize($payment, $amount);
 
@@ -121,16 +121,15 @@ class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abs
         /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
         $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
 
-        $response = $restAPI->authorizeFromSession($order);
+        $restAPI->authorizeFromSession($order);
 
-//        $mpgs_id = $payment->getAdditionalInformation('mpgs_id');
-//        $orderInfo = $restAPI->retrieve_order($mpgs_id);
-//        $helper->updatePaymentInfo($payment, $orderInfo);
-//
-//        $authTxnInfo = $helper->searchTxnByType($orderInfo, 'AUTHORIZATION');
-//
-//        $helper->updateTransferInfo($payment, $authTxnInfo);
-//        $helper->addAuthTxnPayment($payment, $authTxnInfo, false);
+        $orderInfo = $restAPI->retrieve_order($order->getIncrementId());
+        $helper->updatePaymentInfo($payment, $orderInfo);
+
+        $authTxnInfo = $helper->searchTxnByType($orderInfo, 'AUTHORIZATION');
+
+        $helper->updateTransferInfo($payment, $authTxnInfo);
+        $helper->addAuthTxnPayment($payment, $authTxnInfo, false);
 
         return $this;
     }

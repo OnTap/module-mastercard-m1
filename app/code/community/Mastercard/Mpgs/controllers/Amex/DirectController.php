@@ -3,7 +3,7 @@
  * Copyright (c) 2017. On Tap Networks Limited.
  */
 
-class Mastercard_Mpgs_AmexController extends Mastercard_Mpgs_Controller_JsonResponseController
+class Mastercard_Mpgs_Amex_DirectController extends Mastercard_Mpgs_Controller_JsonResponseController
 {
     /**
      * Places the order
@@ -48,15 +48,5 @@ class Mastercard_Mpgs_AmexController extends Mastercard_Mpgs_Controller_JsonResp
         $this->_prepareDataJSON(array(
             'success_url' => $next
         ));
-    }
-
-    /**
-     * Get one page checkout model
-     *
-     * @return Mage_Checkout_Model_Type_Onepage
-     */
-    public function getOnepage()
-    {
-        return Mage::getSingleton('checkout/type_onepage');
     }
 }
