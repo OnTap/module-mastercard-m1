@@ -222,6 +222,32 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
     }
 
     /**
+     * @param Mage_Sales_Model_Order $order
+     * @return array
+     */
+    public function payFromSession(Mage_Sales_Model_Order $order)
+    {
+        $orderId = $order->getIncrementId();
+
+        /** @var Mastercard_Mpgs_Helper_MpgsRest $rest */
+        $rest = Mage::helper('mpgs/mpgsRest');
+
+        $data = array(
+            'apiOperation' => 'PAY'
+        );
+
+        $data['customer'] = $rest->buildCustomerData($order);
+        $data['billing'] = $rest->buildBillingData($order);
+        $data['shipping'] = $rest->buildShippingData($order);
+        $data['order'] = $rest->buildOrderDataFromOrder($order);
+        $data['session'] = $rest->buildSessionData($order->getPayment()->getAdditionalInformation('session'));
+        $data['sourceOfFunds'] = $rest->buildSourceOfFunds();
+
+        $txnId = uniqid(sprintf('%s-', $orderId));
+        return $this->sender(self::MPGS_PUT, 'order/' . $orderId . '/transaction/' . $txnId, $data);
+    }
+
+    /**
      * This method retrieve information of an order on MPGS.
      *
      * @param string $mpgs_id

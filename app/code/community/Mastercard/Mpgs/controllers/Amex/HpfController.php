@@ -8,6 +8,9 @@ class Mastercard_Mpgs_Amex_HpfController extends Mastercard_Mpgs_Controller_Json
     const SESSION_ID = 'id';
     const SESSION_VERSION = 'version';
 
+    /**
+     * @return Mage_Core_Controller_Varien_Action
+     */
     public function placeOrderAction()
     {
         $quote = $this->getOnepage()->getQuote();

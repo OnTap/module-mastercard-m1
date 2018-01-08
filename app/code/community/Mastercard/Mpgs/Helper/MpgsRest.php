@@ -317,7 +317,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
             $iteminfo['name'] = $item->getName();
             $iteminfo['description'] = $item->getDescription();
             $iteminfo['sku'] = $item->getSku();
-            $iteminfo['unitPrice'] = sprintf('%.2F', $item->getRowTotal() - $item->getDiscountAmount());
+            $iteminfo['unitPrice'] = sprintf('%.2F', $item->getPriceInclTax() - $item->getDiscountAmount());
             $iteminfo['quantity'] = $item->getQtyOrdered();
 
             $data['item'][] = $iteminfo;
@@ -350,7 +350,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
             $iteminfo ['name'] = $item->getName();
             $iteminfo ['description'] = $item->getDescription();
             $iteminfo ['sku'] = $item->getSku();
-            $iteminfo ['unitPrice'] = sprintf('%.2F', $item->getRowTotal() - $item->getDiscountAmount());
+            $iteminfo ['unitPrice'] = sprintf('%.2F', $item->getPriceInclTax() - $item->getDiscountAmount());
             $iteminfo ['quantity'] = $item->getQty();
             $order ['item'] [$i] = $iteminfo;
             ++ $i;

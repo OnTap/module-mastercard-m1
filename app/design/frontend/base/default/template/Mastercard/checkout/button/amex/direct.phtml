@@ -60,7 +60,12 @@
             if (transport.responseJSON.exception) {
                 console.error('Backend exception: %s', transport.responseJSON.exception);
             }
+
             alert('<?php echo $this->__("Error in Amex Express Checkout, please try again later.") ?>');
+
+            $('amex-express-checkout').show();
+            $('mpgs-please-wait').hide();
+            $('mpgs-loading').hide();
         },
 
         aecCallbackHandler: function (response) {
