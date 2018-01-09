@@ -247,10 +247,14 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      */
     public function buildOrderDataFromOrder($order)
     {
+        $pricesIncludeTax = Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_PRICE_INCLUDES_TAX);
+        if ($pricesIncludeTax) {
+            $order['taxAmount'] = number_format($order->getShippingAddress()->getData('tax_amount'), 2);
+        }
+
         $data = array();
 
         $data['amount'] = sprintf('%.2F', $order->getGrandTotal());
-        $data['taxAmount'] = number_format($order->getTaxAmount(), 2);
         $data['currency'] = $order->getBaseCurrencyCode();
         $data['shippingAndHandlingAmount'] = number_format($order->getShippingAmount(), 2);
         $data['description'] = 'Magento Order';
@@ -262,9 +266,10 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
             $iteminfo['name'] = $item->getName();
             $iteminfo['description'] = $item->getDescription();
             $iteminfo['sku'] = $item->getSku();
-            $iteminfo['unitPrice'] = sprintf('%.2F', $item->getPriceInclTax() - $item->getDiscountAmount());
-            $iteminfo['quantity'] = $item->getQtyOrdered();
-
+            // XXX: Item is always sent with qty = 1 because
+            // XXX: otherwise we would run into rounding errors when row total is calculated
+            $iteminfo['unitPrice'] = sprintf('%.2F', $item->getRowTotal() - $item->getDiscountAmount());
+            $iteminfo['quantity'] = 1;
             $data['item'][] = $iteminfo;
         }
 
@@ -280,24 +285,32 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      */
     public function buildOrderDataFromQuote($quote, $config)
     {
-        $order ['amount'] = sprintf('%.2F', $quote->getGrandTotal());
-        $order ['taxAmount'] = number_format($quote->getShippingAddress()->getData('tax_amount'), 2);
-        $order ['currency'] = $quote->getStore()->getBaseCurrencyCode();
-        $order ['shippingAndHandlingAmount'] = number_format($quote->getShippingAddress()->getShippingAmount(), 2);
-        $order ['description'] = 'Magento Order';
-        $order ['notificationUrl'] = $config->getWebhookNotificationUrl();
-        $order ['reference'] = $quote->getReservedOrderId();
+        $order = array();
+
+        $pricesIncludeTax = Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_PRICE_INCLUDES_TAX);
+        if ($pricesIncludeTax) {
+            $order['taxAmount'] = number_format($quote->getShippingAddress()->getData('tax_amount'), 2);
+        }
+
+        $order['amount'] = sprintf('%.2F', $quote->getGrandTotal());
+        $order['currency'] = $quote->getStore()->getBaseCurrencyCode();
+        $order['shippingAndHandlingAmount'] = number_format($quote->getShippingAddress()->getShippingAmount(), 2);
+        $order['description'] = 'Magento Order';
+        $order['notificationUrl'] = $config->getWebhookNotificationUrl();
+        $order['reference'] = $quote->getReservedOrderId();
         $i = 0;
 
         /** @var Mage_Sales_Model_Quote_Item $item */
         foreach ($quote->getAllItems() as $item) {
-            $iteminfo ['name'] = $item->getName();
-            $iteminfo ['description'] = $item->getDescription();
-            $iteminfo ['sku'] = $item->getSku();
-            $iteminfo ['unitPrice'] = sprintf('%.2F', $item->getPriceInclTax() - $item->getDiscountAmount());
-            $iteminfo ['quantity'] = $item->getQty();
-            $order ['item'] [$i] = $iteminfo;
-            ++ $i;
+            $iteminfo['name'] = $item->getName();
+            $iteminfo['description'] = $item->getDescription();
+            $iteminfo['sku'] = $item->getSku();
+            // XXX: Item is always sent with qty = 1 because
+            // XXX: otherwise we would run into rounding errors when row total is calculated
+            $iteminfo['unitPrice'] = sprintf('%.2F', $item->getRowTotal() - $item->getDiscountAmount());
+            $iteminfo['quantity'] = 1;
+            $order['item'][$i] = $iteminfo;
+            ++$i;
         }
 
         return $order;

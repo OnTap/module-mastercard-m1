@@ -107,9 +107,8 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * @param Mage_Sales_Model_Quote $quote
      *
      * @return array
-     *
      */
-    public function create_checkout_session( $mpgs_id, $quote ) 
+    public function create_checkout_session($mpgs_id, $quote)
     {
         /** @var Mastercard_Mpgs_Helper_MpgsRest $rest */
         $rest = Mage::helper('mpgs/mpgsRest');
@@ -120,7 +119,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data ['billing'] = $rest->buildBillingData($quote);
         $data ['shipping'] = $rest->buildShippingData($quote);
         $data ['order'] = $rest->buildOrderDataFromQuote($quote, $this->config);
-        $data ['order'] ['id'] = $mpgs_id;
+        $data ['order']['id'] = $mpgs_id;
 
         $resData = $this->sender(self::MPGS_POST, 'session', $data);
 

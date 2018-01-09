@@ -15,12 +15,14 @@
             this.config = config;
             this.button = $('mastercard_hostedcheckout_placeorder');
             if (window.payment.currentMethod === 'Mastercard_hosted') {
-                this.button.on('click', this.openHostedSession.bind(this));
                 this.loadAdapter();
             }
         },
 
         loadAdapter: function () {
+            this.button.stopObserving('click');
+            this.button.on('click', this.openHostedSession.bind(this));
+
             $('mpgs-loading').show();
             this.button.hide();
 
