@@ -145,7 +145,7 @@
                 <debug>0</debug>
                 <test>0</test>
                 <order_status>processing</order_status>
-                <currency/>
+                <currency>USD</currency>
                 <allowspecific>0</allowspecific>
             </Mastercard_hosted>
             <Mastercard_amex>
@@ -154,10 +154,15 @@
                 <active>0</active>
                 <payment_action>authorize</payment_action>
                 <title>Amex Express Checkout</title>
+                <api_username/>
+                <api_password/>
+                <end_point_url>https://eu-gateway.mastercard.com/</end_point_url>
+                <webhook_secret/>
+                <webhook_url/>
                 <debug>0</debug>
                 <test>0</test>
                 <order_status>processing</order_status>
-                <currency/>
+                <currency>USD</currency>
                 <allowspecific>0</allowspecific>
                 <component_url>
                     https://icm.aexp-static.com/Internet/IMDC/US_en/RegisteredCard/IntlAmexExpressCheckout/js/AmexExpressCheckout.js

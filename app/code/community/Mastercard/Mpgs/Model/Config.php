@@ -36,11 +36,10 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
     const TRANSACTION_TYPES = 'global/Mastercard/transaction/types';
     const END_POINTS = 'global/Mastercard/endpoints';
 
-    const API_USERNAME = 'payment/Mastercard_api/api_username';
-    const API_PASSWORD = 'payment/Mastercard_api/api_password';
-    const END_POINT_URL = 'payment/Mastercard_api/end_point_url';
-    const WEBHOOK_SECRET = 'payment/Mastercard_api/webhook_secret';
-
+    protected $pathApiUsername = null;
+    protected $pathApiPassword = null;
+    protected $pathEndpointUrl = null;
+    protected $pathWebhookSecret = null;
     protected $pathCustomEndPointUrl = null;
     protected $pathTestMode = null;
     protected $pathWebhookUrl = null;
@@ -92,7 +91,7 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getApiUsername() 
     {
-        $username = Mage::getStoreConfig(self::API_USERNAME);
+        $username = Mage::getStoreConfig($this->pathApiUsername);
         if (Mage::getStoreConfig($this->pathTestMode) == 1) {
             $username = 'TEST' . $username;
         }
@@ -107,7 +106,7 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getApiPasswordDecrypted() 
     {
-        $password = Mage::getStoreConfig(self::API_PASSWORD);
+        $password = Mage::getStoreConfig($this->pathApiPassword);
 
         return Mage::helper('core')->decrypt($password);
     }
@@ -117,7 +116,7 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getEndPointUrl()
     {
-        $url = Mage::getStoreConfig(self::END_POINT_URL);
+        $url = Mage::getStoreConfig($this->pathEndpointUrl);
 
         if ($url == 'custom') {
             $url = Mage::getStoreConfig($this->pathCustomEndPointUrl);
@@ -161,7 +160,7 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
      */
     public function getWebhookSecret() 
     {
-        $secret = Mage::getStoreConfig(self::WEBHOOK_SECRET);
+        $secret = Mage::getStoreConfig($this->pathWebhookSecret);
         return Mage::helper('core')->decrypt($secret);
     }
 

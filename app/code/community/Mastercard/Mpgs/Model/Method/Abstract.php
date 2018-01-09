@@ -134,7 +134,7 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
         if (empty($refundInfo)) {
             $mpgs_id = $payment->getAdditionalInformation('mpgs_id');
             $currency = $payment->getOrder()->getStore()->getBaseCurrencyCode();
-            $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
+            $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
             $refundInfo = $restAPI->refund_order($mpgs_id, $amount, $currency);
         }
 
@@ -163,7 +163,7 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
         if (empty($voidInfo)) {
             $mpgs_id = $payment->getAdditionalInformation('mpgs_id');
             $txnid = 1;
-            $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
+            $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
             $voidInfo = $restAPI->void_order($mpgs_id, $txnid);
         }
 

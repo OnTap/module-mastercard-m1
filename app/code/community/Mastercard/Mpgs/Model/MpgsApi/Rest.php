@@ -1,45 +1,28 @@
 <?php
-/**
- * Mastercard
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.
- * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@Mastercard.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade this module to newer
- * versions in the future. If you wish to customize this module for your
- * needs please refer to http://testserver.Mastercard.com/software/download.cgi
- * for more information.
- *
- * @author Rafael Waldo Delgado Doblas
- * @version $Id$
- * @copyright Mastercard, 1 Jul, 2016
- * @license http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @package Mastercard
- **/
-
-/**
- * Mastercard_Mpgs_Model_MPGS_RestApi
- *
- * MPGS RestAPI client.
- *
- * @package Mastercard
- * @subpackage Block
- * @author Rafael Waldo Delgado Doblas
- */
 class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 {
     const MPGS_GET = 0;
     const MPGS_POST = 1;
     const MPGS_PUT = 2;
+
+    /**
+     * @var Mastercard_Mpgs_Model_Config
+     */
+    protected $config;
+
+    /**
+     * Mastercard_Mpgs_Model_MpgsApi_Rest constructor.
+     * @param $params
+     * @throws Exception
+     */
+    public function __construct($params)
+    {
+        if (!isset($params['config'])) {
+            throw new Exception('Payment Config not passed to REST client');
+        }
+        $this->config = $params['config'];
+        parent::__construct();
+    }
 
     /**
      * @param $err
@@ -61,12 +44,10 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      */
     protected function sender( $type, $method, $data = null )
     {
-        /** @var Mastercard_Mpgs_Model_Config $config */
-        $config = Mage::getSingleton('mpgs/config_hosted');
-        $username = $config->getApiUsername();
-        $password = $config->getApiPasswordDecrypted();
+        $username = $this->config->getApiUsername();
+        $password = $this->config->getApiPasswordDecrypted();
 
-        $url = $config->getRestApiUrl() . $username . '/' . $method;
+        $url = $this->config->getRestApiUrl() . $username . '/' . $method;
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_USERPWD, "merchant." . $username . ":" . $password);
 
@@ -94,7 +75,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $resData = json_decode($response, true);
 
         /** @var Mastercard_Mpgs_Model_Logger $logger */
-        $logger = Mage::getSingleton('mpgs/logger', array('config' => $config));
+        $logger = Mage::getSingleton('mpgs/logger', array('config' => $this->config));
         $logger->logDebug(array(
             'url' => $url,
             'type' => $type,
@@ -133,7 +114,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data ['customer'] = $rest->buildCustomerData($quote);
         $data ['billing'] = $rest->buildBillingData($quote);
         $data ['shipping'] = $rest->buildShippingData($quote);
-        $data ['order'] = $rest->buildOrderDataFromQuote($quote);
+        $data ['order'] = $rest->buildOrderDataFromQuote($quote, $this->config);
         $data ['order'] ['id'] = $mpgs_id;
 
         $resData = $this->sender(self::MPGS_POST, 'session', $data);

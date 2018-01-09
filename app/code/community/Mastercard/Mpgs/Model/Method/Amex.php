@@ -53,7 +53,7 @@ class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abs
     public function openWallet(Mage_Sales_Model_Quote_Payment $payment, Varien_Object $data)
     {
         /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
-        $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
+        $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
 
         $session = $payment->getAdditionalInformation('session');
         $quote = $payment->getQuote();
@@ -79,7 +79,8 @@ class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abs
         $rest = Mage::helper('mpgs/mpgsRest');
 
         /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
-        $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
+        $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
+
         $response = $restAPI->updateSessionFromWallet($params, $payment->getQuote());
 
         $rest->addCardInfo($payment, $response);
@@ -110,8 +111,7 @@ class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abs
         $helper = Mage::helper('mpgs/mpgsRest');
 
         /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
-        $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
-
+        $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
         $restAPI->authorizeFromSession($order);
 
         $orderInfo = $restAPI->retrieve_order($order->getIncrementId());
@@ -135,7 +135,7 @@ class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abs
         parent::capture($payment, $amount);
 
         /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
-        $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
+        $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
 
         /** @var Mastercard_Mpgs_Helper_MpgsRest $helper */
         $helper = Mage::helper('mpgs/mpgsRest');
@@ -180,7 +180,7 @@ class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abs
         $helper = Mage::helper('mpgs/mpgsRest');
 
         /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
-        $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
+        $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
 
         /** @var Mage_Sales_Model_Order $order */
         $order = $payment->getOrder();

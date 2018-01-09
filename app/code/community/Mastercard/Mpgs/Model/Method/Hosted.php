@@ -120,7 +120,7 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
         $captureInfo = $payment->getAdditionalInformation('webhook_info');
         if (empty($captureInfo)) {
             /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
-            $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
+            $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
 
             $mpgs_id = $payment->getAdditionalInformation('mpgs_id');
             $orderInfo = $restAPI->retrieve_order($mpgs_id);
@@ -162,7 +162,7 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
         parent::authorize($payment, $amount);
 
         $helper = Mage::helper('mpgs/mpgsRest');
-        $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
+        $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
 
         $mpgs_id = $payment->getAdditionalInformation('mpgs_id');
         $orderInfo = $restAPI->retrieve_order($mpgs_id);

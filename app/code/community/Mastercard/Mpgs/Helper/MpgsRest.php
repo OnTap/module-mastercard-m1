@@ -330,12 +330,11 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      * Build a create checkout session Order block.
      *
      * @param Mage_Sales_Model_Quote $quote
+     * @param Mastercard_Mpgs_Model_Config $config
      * @return array
      */
-    public function buildOrderDataFromQuote( $quote )
+    public function buildOrderDataFromQuote($quote, $config)
     {
-
-        $config = Mage::getSingleton('mpgs/config_hosted');
         $order ['amount'] = sprintf('%.2F', $quote->getGrandTotal());
         $order ['taxAmount'] = number_format($quote->getShippingAddress()->getData('tax_amount'), 2);
         $order ['currency'] = $quote->getStore()->getBaseCurrencyCode();
@@ -355,9 +354,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
             $order ['item'] [$i] = $iteminfo;
             ++ $i;
         }
-
         return $order;
-
     }
 
     /**

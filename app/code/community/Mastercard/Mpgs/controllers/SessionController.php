@@ -10,10 +10,12 @@ class Mastercard_Mpgs_SessionController extends Mastercard_Mpgs_Controller_JsonR
      */
     public function walletAction()
     {
+        $payment = $this->getQuote()->getPayment();
+
         $returnData = new Varien_Object();
 
         /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
-        $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest');
+        $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
         $session = $restAPI->createSession();
 
         $payment = $this->getQuote()->getPayment();

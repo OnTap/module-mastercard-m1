@@ -4,11 +4,15 @@
  */
 class Mastercard_Mpgs_Model_Config_Amex extends Mastercard_Mpgs_Model_Config
 {
+    protected $pathApiUsername = 'payment/Mastercard_amex/api_username';
+    protected $pathApiPassword = 'payment/Mastercard_amex/api_password';
+    protected $pathEndpointUrl = 'payment/Mastercard_amex/end_point_url';
+    protected $pathWebhookSecret = 'payment/Mastercard_amex/webhook_secret';
     protected $pathCurrency = 'payment/Mastercard_amex/currency';
     protected $pathTestMode = 'payment/Mastercard_amex/test';
     protected $pathDebug = 'payment/Mastercard_amex/debug';
-    protected $pathWebhookUrl = '';
-    protected $pathCustomEndPointUrl = '';
+    protected $pathWebhookUrl = 'payment/Mastercard_amex/webhook_url';
+    protected $pathCustomEndPointUrl = 'payment/Mastercard_amex/end_point_custom';
 
     const XML_COMPONENT_URL = 'payment/Mastercard_amex/component_url';
     const XML_CLIENT_ID = 'payment/Mastercard_amex/client_id';
