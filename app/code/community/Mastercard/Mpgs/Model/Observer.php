@@ -6,6 +6,7 @@ class Mastercard_Mpgs_Model_Observer
 {
     /**
      * This method updates the result code from a MPGS payment reponse.
+     *
      * @param Varien_Event_Observer $observer
      */
     public function updateResultCode( $observer ) 
@@ -18,6 +19,7 @@ class Mastercard_Mpgs_Model_Observer
 
     /**
      * This method updates the payment section on the order details with additional information from MPGS.
+     *
      * @param Varien_Event_Observer $observer
      * @return $this
      */

@@ -5,18 +5,14 @@
 class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abstract implements Mastercard_Mpgs_Model_Method_WalletInterface
 {
     const WALLET_CODE = 'AMEX_EXPRESS_CHECKOUT';
-
     const METHOD_NAME = 'Mastercard_amex';
-    protected $_code = self::METHOD_NAME;
-
-    protected $_infoBlockType = 'payment/info';
-    protected $_formBlockType = 'mpgs/form_amex';
 
     /**
      * Payment Method features.
      *
      * @var bool
      */
+    protected $_code = self::METHOD_NAME;
     protected $_isGateway = true;
     protected $_canAuthorize = true;
     protected $_canCapture = true;

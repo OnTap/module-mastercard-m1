@@ -1,7 +1,124 @@
 <?php /** @var Mastercard_Mpgs_Block_Checkout_Button_Hosted $this */ ?>
-
 <button type="submit"
         title="<?php echo Mage::helper('core')->quoteEscape($this->__('Place Order')) ?>"
-        class="button btn-checkout" onclick="<?php echo $this->getJsAction(); ?>">
+        class="button btn-checkout"
+        id="mastercard_hostedcheckout_placeorder">
     <span><?php echo $this->__('Place Order') ?></span>
 </button>
+<script type="text/javascript">
+    var HostedCheckout = Class.create();
+    HostedCheckout.prototype = {
+        config: {},
+        button: null,
+
+        initialize: function (config) {
+            this.config = config;
+            this.button = $('mastercard_hostedcheckout_placeorder');
+            if (window.payment.currentMethod === 'Mastercard_hosted') {
+                this.button.on('click', this.openHostedSession.bind(this));
+                this.loadAdapter();
+            }
+        },
+
+        loadAdapter: function () {
+            $('mpgs-loading').show();
+            this.button.hide();
+
+            window.onMpgsError = this.onMpgsError.bind(this);
+            window.onMpgsCancel = this.onMpgsCancel.bind(this);
+            window.onMpgsComplete = this.onMpgsComplete.bind(this);
+
+            var loader = new Element('script', {
+                type: 'text/javascript',
+                async: true,
+                src: this.config.component_url,
+                'data-error': 'onMpgsError',
+                'data-cancel': 'onMpgsCancel',
+                'data-complete': 'onMpgsComplete'
+            });
+            document.body.insert(loader);
+
+            this.waitUntilReady(function () {
+                $('mpgs-loading').hide();
+                this.button.show();
+            }.bind(this));
+        },
+
+        waitUntilReady: function (callback) {
+            setTimeout(function() {
+                if (typeof window.Checkout !== 'undefined') {
+                    callback();
+                } else {
+                    this.waitUntilReady(callback);
+                }
+            }.bind(this), 200);
+        },
+
+        openHostedSession: function () {
+            $('mpgs-loading').show();
+            this.button.hide();
+
+            new Ajax.Request(this.config.create_session_url, {
+                requestHeaders: {
+                    Accept: 'application/json'
+                },
+                parameters: {
+                    cartId: this.config.cart_id
+                },
+                onSuccess: this.sessionCreated.bind(this),
+                onFailure: this.sessionFailed.bind(this)
+            });
+        },
+
+        sessionCreated: function (response) {
+            Checkout.configure({
+                merchant: this.config.merchant,
+                session: {
+                    id: response.responseJSON.SessionID,
+                    version: response.responseJSON.SessionVersion
+                },
+                interaction: {
+                    merchant: {
+                        name: this.config.store_name
+                    }
+                }
+            });
+            Checkout.showLightbox();
+        },
+
+        sessionFailed: function (response) {
+            $('mpgs-loading').hide();
+            this.button.show();
+            alert(response.responseJSON.messages.error[0].message);
+            window.location.href = this.config.cancel_url;
+        },
+
+        onMpgsError: function (error) {
+            $('mpgs-loading').hide();
+            this.button.show();
+            alert(error.cause + ' - ' + error.explanation);
+            window.location.href = this.config.cancel_url;
+        },
+
+        onMpgsCancel: function () {
+            window.location.href = this.config.cancel_url;
+        },
+
+        onMpgsComplete: function (resultIndicator, sessionVersion) {
+            $('mpgs-loading').hide();
+            $('mpgs-please-wait').show();
+
+            var input = new Element('input', {
+                type: 'hidden',
+                id: 'res_code',
+                name: 'res_code',
+                value: resultIndicator
+            });
+
+            $('co-payment-form').appendChild(input);
+
+            review.save();
+        }
+    };
+    new HostedCheckout(<?php echo $this->getJsConfig() ?>);
+</script>
