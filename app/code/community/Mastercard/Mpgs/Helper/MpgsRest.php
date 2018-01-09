@@ -1,39 +1,6 @@
 <?php
 /**
- * Mastercard
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.
- * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@Mastercard.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade this module to newer
- * versions in the future. If you wish to customize this module for your
- * needs please refer to http://testserver.Mastercard.com/software/download.cgi
- * for more information.
- *
- * @author Rafael Waldo Delgado Doblas
- * @version $Id$
- * @copyright Mastercard, 1 Jul, 2016
- * @license http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @package Mastercard
- **/
-
-/**
- * Mastercard_Mpgs_Helper_Rest
- *
- * Helper class that provides a number of transformation functions for use within the module
- *
- * @package Mastercard
- * @subpackage Helper
- * @author Rafael Waldo Delgado Doblas
+ * Copyright (c) 2017. On Tap Networks Limited.
  */
 class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
 {
@@ -64,13 +31,10 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      */
     public function safeValue( $data, $field ) 
     {
-
         return isset($data [$field]) ? $data [$field] : null;
-
     }
 
     /**
-     *
      * Transfrom a multidimension array in a single dimension with dot separed keys
      *
      * @param array $array
@@ -79,7 +43,6 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      */
     public function multiarray_to_plainarray( array $array, &$parsed, $path = null ) 
     {
-
         foreach ($array as $k => $v) {
             if (! is_array($v)) {
                 $fulpath = substr($path, 1) . '.' . $k;
@@ -88,32 +51,38 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
                 $this->multiarray_to_plainarray($v, $parsed, $path . '.' . $k);
             }
         }
-
     }
 
+    /**
+     * @param $payment
+     * @param $data
+     */
     public function addResult( $payment, $data ) 
     {
-
         if (isset($data ['result'])) {
             $payment->setAdditionalInformation('txn_result', $data ['result']);
         }
-
     }
 
+    /**
+     * @param $payment
+     * @param $data
+     */
     public function addRisk( $payment, $data ) 
     {
-
         if (isset($data ['risk'])) {
             $plain = array ();
             $this->multiarray_to_plainarray($data ['risk'], $plain);
             $payment->setAdditionalInformation('risk', $plain);
         }
-
     }
 
+    /**
+     * @param $payment
+     * @param $data
+     */
     public function addCardInfo( $payment, $data ) 
     {
-
         if (isset($data ['sourceOfFunds']) && isset($data ['sourceOfFunds'] ['provided'] ['card'])) {
             $cardDetails = $data ['sourceOfFunds'] ['provided'] ['card'];
 
@@ -136,36 +105,30 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         if (isset($data ['response'] ['cardSecurityCode'])) {
             $payment->setAdditionalInformation('cvv_validation', $data ['response'] ['cardSecurityCode'] ['gatewayCode']);
         }
-
     }
 
     /**
-     *
      * Update payment information with the information provided by MPGS
      *
-     * @param Payment|\Magento\Sales\Api\Data\OrderPaymentInterface $payment
-     * @param array $data
+     * @param $payment
+     * @param $data
      */
     public function updatePaymentInfo( $payment, $data ) 
     {
-
         $this->addResult($payment, $data);
         $this->addRisk($payment, $data);
         $this->addCardInfo($payment, $data);
         $payment->save();
-
     }
 
     /**
-     *
      * Update transfer information with the information provided by MPGS about transaction.
      *
-     * @param Payment|\Magento\Sales\Api\Data\OrderPaymentInterface $payment
-     * @param array $txndata
+     * @param $payment
+     * @param $txndata
      */
     public function updateTransferInfo( $payment, $txndata ) 
     {
-
         if (isset($txndata ['response'] ['gatewayCode'])) {
             $payment->setAdditionalInformation('response_gatewayCode', $txndata ['response'] ['gatewayCode']);
         }
@@ -177,25 +140,20 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         }
 
         $payment->save();
-
     }
 
     /**
-     *
      * Build a create checkout session Transaction block.
      *
      * @return array
      */
     public function buildTransactionData() 
     {
-
         $transaction ['source'] = 'INTERNET';
         return $transaction;
-
     }
 
     /**
-     *
      * Build a create checkout session Interaction block.
      *
      * @return array
@@ -210,20 +168,16 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         $interaction ['displayControl'] ['shipping'] = 'HIDE';
 
         return $interaction;
-
     }
 
     /**
-     *
      * Build a create checkout session Customer block.
      *
      * @param Mage_Sales_Model_Quote|Mage_Sales_Model_Order $quote
-     *
      * @return array
      */
     public function buildCustomerData( $quote ) 
     {
-
         $billingAddress = $quote->getBillingAddress();
         $customer ['email'] = $billingAddress->getEmail();
         $customer ['firstName'] = $billingAddress->getFirstname();
@@ -231,20 +185,16 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         $customer ['phone'] = $billingAddress->getTelephone();
 
         return $customer;
-
     }
 
     /**
-     *
      * Build a create checkout session Billing block.
      *
      * @param Mage_Sales_Model_Quote|Mage_Sales_Model_Order $quote
-     *
      * @return array
      */
     public function buildBillingData( $quote ) 
     {
-
         $billingAddress = $quote->getBillingAddress();
         $billingCountry_2 = $billingAddress->getCountryId();
         $billingCountry_3 = Mage::getModel('directory/country')->loadByCode($billingCountry_2)->getIso3_code();
@@ -259,20 +209,16 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         $billing ['address'] ['street2'] = count($billingStreet) > 1 ? $billingStreet [1] : null;
 
         return $billing;
-
     }
 
     /**
-     *
      * Build a create checkout session Shipping block.
      *
      * @param Mage_Sales_Model_Quote|Mage_Sales_Model_Order $quote
-     *
      * @return array
      */
     public function buildShippingData( $quote ) 
     {
-
         $shippingAddress = $quote->getShippingAddress();
         $shippingCountry_2 = $shippingAddress->getCountryId();
         $shippingCountry_3 = Mage::getModel('directory/country')->loadByCode($shippingCountry_2)->getIso3_code();
@@ -291,7 +237,6 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         $shipping ['contact'] ['phone'] = $shippingAddress->getTelephone();
 
         return $shipping;
-
     }
 
     /**
@@ -426,11 +371,9 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      * translation functionality
      *
      * @return string $key
-     *
      */
-    public function getLabel( $key ) 
+    public function getLabel($key)
     {
-
         $labels = array (
                 'response_gatewayCode' => 'Gateway Code',
                 'txn_result' => 'Transaction Result',
@@ -451,13 +394,16 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
                 ".totalRefundedAmount" => 'Total Refunded Amount'
         );
 
-        return (! empty($labels [$key])) ? $this->__($labels [$key]) : $key;
-
+        return (!empty($labels [$key])) ? $this->__($labels [$key]) : $key;
     }
 
-    public function searchTxnByType( $orderInfo, $type ) 
+    /**
+     * @param $orderInfo
+     * @param $type
+     * @return null
+     */
+    public function searchTxnByType($orderInfo, $type)
     {
-
         foreach ($orderInfo ['transaction'] as $txnInfo) {
             if ($txnInfo ['transaction'] ['type'] === $type) {
                 return $txnInfo;
@@ -466,48 +412,74 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         }
 
         return null;
-
     }
 
-    public function isAllPaid( $payment, $captureInfo ) 
+    /**
+     * @param $payment
+     * @param $captureInfo
+     * @return bool
+     */
+    public function isAllPaid($payment, $captureInfo)
     {
-
         $paid = $payment->getAmountPaid() + $captureInfo ['transaction'] ['amount'];
         return $paid >= $payment->getAmountAuthorized();
-
     }
 
-    public function addAuthTxnPayment( $payment, $txnInfo, $close ) 
+    /**
+     * @param $payment
+     * @param $txnInfo
+     * @param $close
+     * @return mixed
+     */
+    public function addAuthTxnPayment($payment, $txnInfo, $close)
     {
-
         return $this->addTxnPayment($payment, $txnInfo, Mage_Sales_Model_Order_Payment_Transaction::TYPE_AUTH, $close);
-
     }
 
-    public function addCaptureTxnPayment( $payment, $txnInfo, $parentTxnId, $closeParent ) 
+    /**
+     * @param $payment
+     * @param $txnInfo
+     * @param $parentTxnId
+     * @param $closeParent
+     * @return mixed
+     */
+    public function addCaptureTxnPayment($payment, $txnInfo, $parentTxnId, $closeParent)
     {
-
         return $this->addTxnPayment($payment, $txnInfo, Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE, true, $parentTxnId, $closeParent);
-
     }
 
-    public function addRefundTxnPayment( $payment, $txnInfo ) 
+    /**
+     * @param $payment
+     * @param $txnInfo
+     * @return mixed
+     */
+    public function addRefundTxnPayment($payment, $txnInfo)
     {
-
         return $this->addTxnPayment($payment, $txnInfo, Mage_Sales_Model_Order_Payment_Transaction::TYPE_REFUND, true);
-
     }
 
-    public function addVoidTxnPayment( $payment, $txnInfo, $parentTxnId ) 
+    /**
+     * @param $payment
+     * @param $txnInfo
+     * @param $parentTxnId
+     * @return mixed
+     */
+    public function addVoidTxnPayment($payment, $txnInfo, $parentTxnId)
     {
-
         return $this->addTxnPayment($payment, $txnInfo, Mage_Sales_Model_Order_Payment_Transaction::TYPE_VOID, true, $parentTxnId, true);
-
     }
 
-    protected function addTxnPayment( $payment, $txnInfo, $type, $close, $parentTxnId = null, $closeParent = null ) 
+    /**
+     * @param $payment
+     * @param $txnInfo
+     * @param $type
+     * @param $close
+     * @param null $parentTxnId
+     * @param null $closeParent
+     * @return mixed
+     */
+    protected function addTxnPayment($payment, $txnInfo, $type, $close, $parentTxnId = null, $closeParent = null)
     {
-
         $payment->setSkipTransactionCreation(false);
 
         $helper = Mage::helper('mpgs/mpgsRest');
@@ -531,6 +503,5 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         $payment->setSkipTransactionCreation(true);
 
         return $txn;
-
     }
 }

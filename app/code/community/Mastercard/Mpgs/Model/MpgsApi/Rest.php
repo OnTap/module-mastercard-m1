@@ -1,4 +1,7 @@
 <?php
+/**
+ * Copyright (c) 2018. On Tap Networks Limited.
+ */
 class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 {
     const MPGS_GET = 0;
@@ -29,7 +32,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      */
     protected function _critical($err)
     {
-
+        // @todo: implement
     }
 
     /**
@@ -38,7 +41,6 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * @param integer $type
      * @param string $method
      * @param array $data
-     *
      * @return array
      * @throws Exception
      */
@@ -124,7 +126,6 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         }
 
         return $resData;
-
     }
 
     /**
@@ -232,38 +233,26 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * This method retrieve information of an order on MPGS.
      *
      * @param string $mpgs_id
-     *
      * @return array
-     *
      */
     public function retrieve_order( $mpgs_id ) 
     {
-
         $data ['apiOperation'] = 'RETRIEVE_ORDER';
-
         $resData = $this->sender(self::MPGS_GET, 'order/' . $mpgs_id, $data);
-
         return $resData;
-
     }
 
     /**
      * This method retrieve information of a transaction on MPGS.
      *
      * @param string $mpgs_id
-     *
      * @return array
-     *
      */
     public function retrieve_transaction( $mpgs_id, $txn_id ) 
     {
-
         $data ['apiOperation'] = 'RETRIEVE_TRANSACTION';
-
         $resData = $this->sender(self::MPGS_GET, 'order/' . $mpgs_id . '/transaction/' . $txn_id, $data);
-
         return $resData;
-
     }
 
     /**
@@ -272,13 +261,10 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * @param string $mpgs_id
      * @param float $amount
      * @param string $currency
-     *
      * @return array
-     *
      */
     public function capture_order( $mpgs_id, $amount, $currency ) 
     {
-
         $data ['apiOperation'] = 'CAPTURE';
         $data ['transaction'] ['amount'] = sprintf('%.2F', $amount);
         $data ['transaction'] ['currency'] = $currency;
@@ -287,7 +273,6 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $resData = $this->sender(self::MPGS_PUT, 'order/' . $mpgs_id . '/transaction/' . $txnid, $data);
 
         return $resData;
-
     }
 
     /**
@@ -296,13 +281,10 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * @param string $mpgs_id
      * @param float $amount
      * @param string $currency
-     *
      * @return array
-     *
      */
     public function refund_order( $mpgs_id, $amount, $currency ) 
     {
-
         $data ['apiOperation'] = 'REFUND';
         $data ['transaction'] ['amount'] = sprintf('%.2F', $amount);
         $data ['transaction'] ['currency'] = $currency;
@@ -311,7 +293,6 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $resData = $this->sender(self::MPGS_PUT, 'order/' . $mpgs_id . '/transaction/' . $txnid, $data);
 
         return $resData;
-
     }
 
     /**
@@ -319,13 +300,10 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      *
      * @param string $mpgs_id
      * @param string $txnid
-     *
      * @return array
-     *
      */
     public function void_order( $mpgs_id, $txnid ) 
     {
-
         $data ['apiOperation'] = 'VOID';
         $data ['transaction'] ['targetTransactionId'] = $txnid;
 
@@ -334,6 +312,5 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $resData = $this->sender(self::MPGS_PUT, 'order/' . $mpgs_id . '/transaction/' . $_txnid, $data);
 
         return $resData;
-
     }
 }

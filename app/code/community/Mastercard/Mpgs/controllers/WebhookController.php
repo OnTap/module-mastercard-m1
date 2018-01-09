@@ -1,39 +1,6 @@
 <?php
 /**
- * Mastercard
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.
- * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@Mastercard.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade this module to newer
- * versions in the future. If you wish to customize this module for your
- * needs please refer to http://testserver.Mastercard.com/software/download.cgi
- * for more information.
- *
- * @author Rafael Waldo Delgado Doblas
- * @version $Id$
- * @copyright Mastercard, 1 Jul, 2016
- * @license http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @package Mastercard
- **/
-
-/**
- * Mastercard_Mpgs_WebhookController
- *
- * Controller to handle Webhook Notifications from MPGS
- *
- * @package Mastercard
- * @subpackage Controllers
- * @author Rafael Waldo Delgado Doblas
+ * Copyright (c) 2017. On Tap Networks Limited.
  */
 class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Action
 {
@@ -47,13 +14,11 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
      * to create an invoice (that means capture in magento) to match the order status on target platform. The invoice
      * will be created online so a transaction is added to the order but actully will not hit MPGS again.
      *
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
+     * @param $order
      * @param array $txnInfo
-     *
      */
-    protected function createInvoice( $order, $txnInfo ) 
+    protected function createInvoice($order, $txnInfo)
     {
-
         $totals ['txnAmount'] = $txnInfo ['transaction'] ['amount'];
         $totals ['txnTaxAmount'] = $txnInfo ['transaction'] ['taxAmount'];
         $invoice = Mage::getModel('mpgs/service_order', $order)->prepareInvoice($totals);
@@ -67,7 +32,6 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
             ->addObject($invoice)
             ->addObject($invoice->getOrder())
             ->save();
-
     }
 
     /**
@@ -76,14 +40,12 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
      * to create a credit memo (that means refund in magento) to match the order status on target platform. The credit
      * memo will be created online so a transaction is added to the order but actully will not hit MPGS again.
      *
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
+     * @param $order
      * @param array $txnInfo
-     *
      */
-    protected function createCreditMemo( $order, $txnInfo ) 
+    protected function createCreditMemo($order, $txnInfo)
     {
-
-        if (! $order->canCreditmemo()) {
+        if (!$order->canCreditmemo()) {
             Mage::throwException(Mage::helper('core')->__('Cannot create a credit memo.'));
         }
 
@@ -143,35 +105,29 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
 
         $order->getPayment()->setAdditionalInformation('webhook_info', null);
         $transactionSave->save();
-
     }
 
     /**
      * Voids an order in auth state.
      *
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
-     *
+     * @param $order
      */
-    protected function voidAuth( $order, $txnInfo ) 
+    protected function voidAuth($order, $txnInfo)
     {
-
         $order->getPayment()->setAdditionalInformation('webhook_info', $txnInfo);
         $order->getPayment()->void();
         $order->getPayment()->setAdditionalInformation('webhook_info', null);
 
         Mage::getModel('core/resource_transaction')->addObject($order)->addObject($order->getPayment())->save();
-
     }
 
     /**
      * Voids a capture.
      *
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
-     *
+     * @param $order
      */
-    protected function voidCapture( $order, $txnInfo ) 
+    protected function voidCapture($order, $txnInfo)
     {
-
         $txn_id = $txnInfo ['transaction'] ['targetTransactionId'];
         $invoices = Mage::getResourceModel('sales/order_invoice_collection');
         $invoices = $invoices->setOrderFilter($order)->addFieldToFilter('transaction_id', $txn_id);
@@ -206,24 +162,21 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
         $helper->updateTransferInfo($invoice->getOrder()->getPayment(), $txnInfo);
         $helper->addVoidTxnPayment($invoice->getOrder()->getPayment(), $txnInfo, $txn_id);
 
-        $transactionSave = Mage::getModel('core/resource_transaction')
+        Mage::getModel('core/resource_transaction')
             ->addObject($invoice)
             ->addObject($invoice->getOrder())
             ->addObject($invoice->getOrder()->getPayment())
             ->addObject($authTransaction)
             ->save();
-
     }
 
     /**
      * Voids a refund.
      *
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
-     *
+     * @param $order
      */
-    protected function voidRefund( $order, $txnInfo ) 
+    protected function voidRefund($order, $txnInfo)
     {
-
         $txn_id = $txnInfo ['transaction'] ['targetTransactionId'];
         $creditMemos = Mage::getResourceModel('sales/order_creditmemo_collection');
         $creditMemos = $creditMemos->setOrderFilter($order)->addFieldToFilter('transaction_id', $txn_id);
@@ -280,24 +233,21 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
         }
 
         $transactionSave->save();
-
     }
 
     /**
-     *
      * Update order information with the information provided by MPGS Webhook Notification.
      *
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
-     * @param array $data
+     * @param $order
+     * @param array $txnInfo
      * @param string $headerid
      */
-    protected function updateOrderDetails( $order, $txnInfo, $headerid ) 
+    protected function updateOrderDetails($order, $txnInfo, $headerid)
     {
-
         $payment = $order->getPayment();
         $helper = Mage::helper('mpgs/mpgsRest');
 
-        $order->addStatusHistoryComment(sprintf(__('Order updated by gateway [ID: %s]'), $headerid));
+        $order->addStatusHistoryComment(sprintf(__('Order updated by gateway [ID: %1]'), $headerid));
 
         switch ($txnInfo ['transaction'] ['type']) {
             case 'CAPTURE' :
@@ -316,139 +266,129 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
                 $this->voidRefund($order, $txnInfo);
                 break;
         }
-
-    }
-
-    protected function disableRefund( $order, $msg ) 
-    {
-
-        $order->getPayment()->setAdditionalInformation('disableRefund', '1');
-        $order->addStatusHistoryComment(__($msg));
-        $order->save();
-
     }
 
     /**
-     *
+     * @param $order
+     * @param $msg
+     */
+    protected function disableRefund($order, $msg)
+    {
+        $order->getPayment()->setAdditionalInformation('disableRefund', '1');
+        $order->addStatusHistoryComment(__($msg));
+        $order->save();
+    }
+
+    /**
      * Check if the transaction is already present on the order.
      *
-     * @param \Magento\Sales\Api\Data\OrderInterface $order
+     * @param $order
      * @param string $txnId
-     *
      * @return boolean
-     *
      */
-    protected function isTxnIdPresent( $order, $txnId ) 
+    protected function isTxnIdPresent($order, $txnId)
     {
-
         $transactions = Mage::getModel('sales/order_payment_transaction')
             ->getCollection()
             ->addAttributeToFilter('order_id', $order->getEntityId())
             ->addAttributeToFilter('txn_id', $txnId);
         return count($transactions) > 0;
-
     }
 
     /**
      * Fetch a order object by MPGS Ref.
      *
      * @param string $mpgsRef
-     *
-     * @return \Magento\Sales\Api\Data\OrderInterface
-     *
-     * @throws NoSuchEntityException
+     * @return array
+     * @throws Exception
      */
-    protected function getOrderbyMpgsRef( $mpgsId, $mpgsRef ) 
+    protected function getOrderbyMpgsRef($mpgsId, $mpgsRef)
     {
-
         $helper = Mage::helper('mpgs');
 
         // Find the order
         $orders = Mage::getModel('sales/order')->getCollection()->addAttributeToFilter('increment_id', $mpgsRef);
         if (count($orders) < 1 || count($orders) > 1) {
-            throw new NoSuchEntityException(__($helper->maskDebugMessages('Could not find order.')));
+            throw new Exception(__($helper->maskDebugMessages('Could not find order.')));
         }
 
         $order = $orders->getFirstItem();
 
         // Verify that the order correspoding to the reference is the one that correspond to the MPGS Id to avoid order spoofing.
         if ($order->getPayment()->getAdditionalInformation('mpgs_id') != $mpgsId) {
-            throw new NoSuchEntityException(__($helper->maskDebugMessages('MPGS Id Missmatch.')));
+            throw new Exception(__($helper->maskDebugMessages('MPGS Id Missmatch.')));
         }
 
         return $order;
-
     }
 
-    protected function validateConnectionDetails( $request ) 
+    /**
+     * @param $request
+     * @throws Exception
+     */
+    protected function validateConnectionDetails($request)
     {
-
         if (! $request->isSecure()) {
-            throw new \Exception(__('Secure connection required.'));
+            throw new Exception(__('Secure connection required.'));
         }
 
         $headerid = $this->getRequest()->getHeader(static::X_HEADER_ID);
         if (empty($headerid)) {
-            throw new \Exception(__('Header ID not provided'));
+            throw new Exception(__('Header ID not provided'));
         }
 
         $requestSecret = $request->getHeader(static::X_HEADER_SECRET);
         if (empty($requestSecret)) {
-            throw new \Exception(__('Authorization not provided'));
+            throw new Exception(__('Authorization not provided'));
         }
 
         $WebhookSecret = Mage::getSingleton('mpgs/config')->getWebhookSecret();
         if (empty($WebhookSecret)) {
-            throw new \Exception(__('Webhook Disabled'));
+            throw new Exception(__('Webhook Disabled'));
         }
 
         if ($WebhookSecret !== $requestSecret) {
-            throw new \Exception(__('Authorization failed'));
+            throw new Exception(__('Authorization failed'));
         }
-
-    }
-
-    protected function validateWebhookInfo( $txnInfo ) 
-    {
-
-        if (! isset($txnInfo ['transaction']) || ! isset($txnInfo ['transaction'] ['type'])) {
-            throw new \Exception(__('Invalid data received (Transaction Type)'));
-        }
-
-        if (! isset($txnInfo ['transaction']) || ! isset($txnInfo ['transaction'] ['id'])) {
-            throw new \Exception(__('Invalid data received (Transaction Id)'));
-        }
-
-        if (! isset($txnInfo ['order']) || ! isset($txnInfo ['order'] ['id'])) {
-            throw new \Exception(__('Invalid data received (Order ID)'));
-        }
-
     }
 
     /**
-     *
+     * @param $txnInfo
+     * @throws Exception
+     */
+    protected function validateWebhookInfo($txnInfo)
+    {
+        if (! isset($txnInfo ['transaction']) || ! isset($txnInfo ['transaction'] ['type'])) {
+            throw new Exception(__('Invalid data received (Transaction Type)'));
+        }
+
+        if (! isset($txnInfo ['transaction']) || ! isset($txnInfo ['transaction'] ['id'])) {
+            throw new Exception(__('Invalid data received (Transaction Id)'));
+        }
+
+        if (! isset($txnInfo ['order']) || ! isset($txnInfo ['order'] ['id'])) {
+            throw new Exception(__('Invalid data received (Order ID)'));
+        }
+    }
+
+    /**
      * Decodes the json data from MPGS Webhook Notification request.
      *
      * @return array
-     *
-     * @throws \Zend_Json_Exception
+     * @throws Zend_Json_Exception
      */
     protected function getData() 
     {
-
-        return \Zend_Json_Decoder::decode($this->getRequest()->getRawBody(), \Zend_Json::TYPE_ARRAY);
-
+        return Zend_Json_Decoder::decode($this->getRequest()->getRawBody(), Zend_Json::TYPE_ARRAY);
     }
 
     /**
      * Dispatch MPGS Webhook Notification request.
      *
-     * @return \Magento\Framework\Controller\ResultInterface
-     *
+     * @return Zend_Controller_Response_Abstract
      */
     public function updateAction() 
     {
-
         $request = $this->getRequest();
         $response = $this->getResponse();
 

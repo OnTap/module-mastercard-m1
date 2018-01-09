@@ -4,6 +4,9 @@
  */
 class Mastercard_Mpgs_Model_Source_Backends
 {
+    /**
+     * @return array
+     */
     public function toOptionArray()
     {
         return array(

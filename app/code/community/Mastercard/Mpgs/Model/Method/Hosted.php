@@ -1,39 +1,6 @@
 <?php
 /**
- * Mastercard
- *
- * NOTICE OF LICENSE
- *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.
- * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to info@Mastercard.com so we can send you a copy immediately.
- *
- * DISCLAIMER
- *
- * Do not edit or add to this file if you wish to upgrade this module to newer
- * versions in the future. If you wish to customize this module for your
- * needs please refer to http://testserver.Mastercard.com/software/download.cgi
- * for more information.
- *
- * @author Rafael Waldo Delgado Doblas
- * @version $Id$
- * @copyright Mastercard, 1 Jul, 2016
- * @license http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- * @package Mastercard
- **/
-
-/**
- * Mastercard_Mpgs_Model_Method_Hosted
- *
- * Hosted checkout payment method
- *
- * @package Mastercard
- * @subpackage Block
- * @author Rafael Waldo Delgado Doblas
+ * Copyright (c) 2017. On Tap Networks Limited.
  */
 class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_Abstract
 {
@@ -83,22 +50,21 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
      * @param string $resultCode
      *
      */
-    public function setResultCode( $resultCode ) 
+    public function setResultCode($resultCode)
     {
-
         $this->_resultCode = $resultCode;
-
     }
 
-    protected function verifyResultCode( $payment ) 
+    /**
+     * @param $payment
+     */
+    protected function verifyResultCode($payment)
     {
-
         $successIndicator = $payment->getAdditionalInformation("successIndicator");
         if ($this->_resultCode != $successIndicator) {
             $helper = Mage::helper('mpgs');
             Mage::throwException($helper->maskDebugMessages("Error successIndicator doesnt match with resultCode."));
         }
-
     }
 
     /**
@@ -110,9 +76,8 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
      * @return Mastercard_Mpgs_Model_Method_Hosted
      * @author Rafel Waldo Delgado Doblas
      */
-    public function capture( Varien_Object $payment, $amount ) 
+    public function capture(Varien_Object $payment, $amount)
     {
-
         parent::capture($payment, $amount);
         $helper = Mage::helper('mpgs/mpgsRest');
 
@@ -142,7 +107,6 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
         $helper->addCaptureTxnPayment($payment, $captureInfo, $txnAuth->getTxnId(), $helper->isAllPaid($payment, $captureInfo));
 
         return $this;
-
     }
 
     /**
@@ -154,9 +118,8 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
      * @return Mastercard_Mpgs_Model_Method_Hosted
      * @author Rafel Waldo Delgado Doblas
      */
-    public function authorize( Varien_Object $payment, $amount ) 
+    public function authorize(Varien_Object $payment, $amount)
     {
-
         $this->verifyResultCode($payment);
 
         parent::authorize($payment, $amount);
@@ -174,6 +137,5 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
         $helper->addAuthTxnPayment($payment, $authTxnInfo, false);
 
         return $this;
-
     }
 }

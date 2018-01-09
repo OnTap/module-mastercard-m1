@@ -1,14 +1,16 @@
 <?xml version="1.0"?>
 <layout version="0.1.0">
-	<checkout_onepage_index>
-		<reference name="head">
-			<block type="core/template" name="head.mastercard" template="Mastercard/page/head.phtml"/>
-		</reference>
-	</checkout_onepage_index>
-	<checkout_onepage_review>
-		<reference name="checkout.onepage.review.info.items.after">
-            <block type="checkout/agreements" name="checkout.onepage.agreements" as="agreements" template="checkout/onepage/agreements.phtml"/>
-			<block type="mpgs/checkout_placeOrder" name="checkout.onepage.review.mastercard-place-order" template="Mastercard/checkout/placeOrder.phtml" />
-		</reference>
-	</checkout_onepage_review>
+    <checkout_onepage_index>
+        <reference name="head">
+            <block type="core/template" name="head.mastercard" template="Mastercard/page/head.phtml"/>
+        </reference>
+    </checkout_onepage_index>
+    <checkout_onepage_review>
+        <reference name="checkout.onepage.review.info.items.after">
+            <block type="checkout/agreements" name="checkout.onepage.agreements" as="agreements"
+                   template="checkout/onepage/agreements.phtml"/>
+            <block type="mpgs/checkout_placeOrder" name="checkout.onepage.review.mastercard-place-order"
+                   template="Mastercard/checkout/placeOrder.phtml"/>
+        </reference>
+    </checkout_onepage_review>
 </layout>
