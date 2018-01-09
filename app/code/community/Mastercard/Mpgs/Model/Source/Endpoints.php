@@ -18,6 +18,7 @@ class Mastercard_Mpgs_Model_Source_Endpoints
                     'label' => $name
             );
         }
+
         return $options;
     }
 }

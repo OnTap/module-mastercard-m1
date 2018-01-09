@@ -19,7 +19,8 @@ class Mastercard_Mpgs_Block_Checkout_Button_Amex_Hpf extends Mastercard_Mpgs_Blo
     public function getJsConfig()
     {
         $quote = $this->getQuote();
-        return json_encode(array(
+        return json_encode(
+            array(
             'debug' => $this->getConfig()->isDebugEnabled(),
             'component_url' => $this->getConfig()->getSessionComponentUrl(),
             'client_id' => $this->getConfig()->getClientId(),
@@ -27,7 +28,8 @@ class Mastercard_Mpgs_Block_Checkout_Button_Amex_Hpf extends Mastercard_Mpgs_Blo
             'grand_total' => $quote->getGrandTotal(),
             'currency' => $quote->getQuoteCurrencyCode(),
             'place_order_url' => Mage::getUrl('mastercard/amex_hpf/placeOrder', array('_secure' => true)),
-        ));
+            )
+        );
     }
 
     /**

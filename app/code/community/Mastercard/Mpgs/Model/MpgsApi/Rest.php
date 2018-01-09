@@ -23,6 +23,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         if (!isset($params['config'])) {
             throw new Exception('Payment Config not passed to REST client');
         }
+
         $this->config = $params['config'];
         parent::__construct();
     }
@@ -78,12 +79,14 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 
         /** @var Mastercard_Mpgs_Model_Logger $logger */
         $logger = Mage::getSingleton('mpgs/logger', array('config' => $this->config));
-        $logger->logDebug(array(
+        $logger->logDebug(
+            array(
             'url' => $url,
             'type' => $type,
             'payload' => $payload,
             'response' => $response
-        ));
+            )
+        );
 
         try {
             /** @var Mastercard_Mpgs_Model_MpgsApi_Validator $validator */
@@ -151,9 +154,11 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      */
     public function createSession()
     {
-        $resData = $this->sender(self::MPGS_POST, 'session', array(
+        $resData = $this->sender(
+            self::MPGS_POST, 'session', array(
             'correlationId' => null
-        ));
+            )
+        );
         return $resData;
     }
 

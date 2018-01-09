@@ -101,7 +101,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Validator extends Varien_Object
                 throw new Exception($msg);
             }
 
-            $errors = [];
+            $errors = array();
             switch ($response['result']) {
                 case self::SUCCESS:
                     break;

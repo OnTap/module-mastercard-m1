@@ -21,9 +21,11 @@ class Mastercard_Mpgs_Model_Api2_Restapi_Rest_Guest_V1 extends Mastercard_Mpgs_M
         $quote->reserveOrderId();
         $quote->save();
 
-        $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest', array(
+        $restAPI = Mage::getSingleton(
+            'mpgs/mpgsApi_rest', array(
             'config' => Mage::getSingleton('mpgs/config_hosted')
-        ));
+            )
+        );
         $mpgs_id = uniqid(sprintf('%s-', ( string ) $quote->getReservedOrderId()));
         $resData = $restAPI->create_checkout_session($mpgs_id, $quote);
 

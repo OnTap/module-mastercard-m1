@@ -19,6 +19,7 @@ class Mastercard_Mpgs_Model_Source_Authtypes
                 'label' => $name
             );
         }
+
         return $options;
     }
 }

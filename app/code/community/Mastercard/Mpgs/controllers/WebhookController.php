@@ -398,9 +398,11 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
             $txnInfo = $this->getData();
             $this->validateWebhookInfo($txnInfo);
 
-            $restAPI = Mage::getSingleton('mpgs/mpgsApi_rest', array(
+            $restAPI = Mage::getSingleton(
+                'mpgs/mpgsApi_rest', array(
                 'config' => Mage::getSingleton('mpgs/config_hosted')
-            ));
+                )
+            );
             $mpgsId = $txnInfo ['order'] ['id'];
             $txnId = $txnInfo ['transaction'] ['id'];
             $txnInfo = $restAPI->retrieve_transaction($mpgsId, $txnId);

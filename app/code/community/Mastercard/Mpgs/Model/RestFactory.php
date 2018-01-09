@@ -18,8 +18,10 @@ class Mastercard_Mpgs_Model_RestFactory
      */
     public function get(Varien_Object $payment)
     {
-        return Mage::getSingleton('mpgs/mpgsApi_rest', array(
+        return Mage::getSingleton(
+            'mpgs/mpgsApi_rest', array(
             'config' => Mage::getSingleton($this->methodConfigMapper[$payment->getMethod()])
-        ));
+            )
+        );
     }
 }

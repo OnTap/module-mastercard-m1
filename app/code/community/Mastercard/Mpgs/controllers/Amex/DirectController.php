@@ -35,18 +35,24 @@ class Mastercard_Mpgs_Amex_DirectController extends Mastercard_Mpgs_Controller_J
             $quote->save();
         } catch (Exception $e) {
             $this->getResponse()->setHttpResponseCode(503);
-            $this->_prepareDataJSON(array(
+            $this->_prepareDataJSON(
+                array(
                 'exception' => $e->getMessage()
-            ));
+                )
+            );
             return;
         }
 
-        $next = Mage::getUrl('checkout/onepage/success', array(
+        $next = Mage::getUrl(
+            'checkout/onepage/success', array(
             '_secure' => true
-        ));
+            )
+        );
 
-        $this->_prepareDataJSON(array(
+        $this->_prepareDataJSON(
+            array(
             'success_url' => $next
-        ));
+            )
+        );
     }
 }

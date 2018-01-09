@@ -299,6 +299,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
             $order ['item'] [$i] = $iteminfo;
             ++ $i;
         }
+
         return $order;
     }
 
