@@ -60,4 +60,28 @@ class Mastercard_Mpgs_Model_Config_Amex extends Mastercard_Mpgs_Model_Config
         $url .= 'form/version/' . self::API_VERSION . '/merchant/' . $this->getApiUsername() . '/session.js';
         return $url;
     }
+
+    /**
+     * Retrieve MPGS Webhook Notifications URL.
+     * @return string|null
+     */
+    public function getWebhookNotificationUrl()
+    {
+        $webhookSecret = $this->getWebhookSecret();
+        if (empty($webhookSecret)) {
+            return null;
+        }
+
+        $url = Mage::getStoreConfig($this->pathWebhookUrl);
+        if (!empty($url)) {
+            return $url;
+        }
+
+        return Mage::getUrl(
+            self::WEB_HOOK_UPDATE_URL, array(
+                '_secure' => true,
+                'type' => 'amex'
+            )
+        );
+    }
 }

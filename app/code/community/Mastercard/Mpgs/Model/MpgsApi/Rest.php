@@ -204,7 +204,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data['customer'] = $rest->buildCustomerData($order);
         $data['billing'] = $rest->buildBillingData($order);
         $data['shipping'] = $rest->buildShippingData($order);
-        $data['order'] = $rest->buildOrderDataFromOrder($order);
+        $data['order'] = $rest->buildOrderDataFromOrder($order, $this->config);
         $data['session'] = $rest->buildSessionData($order->getPayment()->getAdditionalInformation('session'));
         $data['sourceOfFunds'] = $rest->buildSourceOfFunds();
 
@@ -231,7 +231,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data['customer'] = $rest->buildCustomerData($order);
         $data['billing'] = $rest->buildBillingData($order);
         $data['shipping'] = $rest->buildShippingData($order);
-        $data['order'] = $rest->buildOrderDataFromOrder($order);
+        $data['order'] = $rest->buildOrderDataFromOrder($order, $this->config);
         $data['session'] = $rest->buildSessionData($order->getPayment()->getAdditionalInformation('session'));
         $data['sourceOfFunds'] = $rest->buildSourceOfFunds();
 

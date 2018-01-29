@@ -63,8 +63,7 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
     {
         $successIndicator = $payment->getAdditionalInformation("successIndicator");
         if ($this->_resultCode != $successIndicator) {
-            $helper = Mage::helper('mpgs');
-            Mage::throwException($helper->maskDebugMessages("Error successIndicator doesnt match with resultCode."));
+            Mage::throwException($this->getConfig()->maskDebugMessage("Error successIndicator does't match with resultCode."));
         }
     }
 

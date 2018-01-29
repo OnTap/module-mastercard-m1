@@ -245,9 +245,10 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      * Build order array
      *
      * @param Mage_Sales_Model_Order $order
+     * @param Mastercard_Mpgs_Model_Config $config
      * @return array
      */
-    public function buildOrderDataFromOrder($order)
+    public function buildOrderDataFromOrder($order, $config)
     {
         $pricesIncludeTax = Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_PRICE_INCLUDES_TAX);
         if ($pricesIncludeTax) {
@@ -260,6 +261,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         $data['currency'] = $order->getBaseCurrencyCode();
         $data['shippingAndHandlingAmount'] = number_format($order->getShippingAmount(), 2);
         $data['description'] = 'Magento Order';
+        $data['notificationUrl'] = $config->getWebhookNotificationUrl();
         $data['reference'] = $order->getIncrementId();
         $data['item'] = array();
 

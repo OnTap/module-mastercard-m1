@@ -252,9 +252,6 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
      */
     protected function updateOrderDetails($order, $txnInfo, $headerid)
     {
-        $payment = $order->getPayment();
-        $helper = Mage::helper('mpgs/mpgsRest');
-
         $order->addStatusHistoryComment(sprintf(__('Order updated by gateway [ID: %1]'), $headerid));
 
         switch ($txnInfo ['transaction'] ['type']) {
@@ -312,20 +309,20 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
      */
     protected function getOrderbyMpgsRef($mpgsId, $mpgsRef)
     {
-        $helper = Mage::helper('mpgs');
-
         // Find the order
         $orders = Mage::getModel('sales/order')->getCollection()->addAttributeToFilter('increment_id', $mpgsRef);
         if (count($orders) < 1 || count($orders) > 1) {
-            throw new Exception(__($helper->maskDebugMessages('Could not find order.')));
+            $config = $this->configFactory($this->getRequest()->getParam('type', ''));
+            Mage::throwException($config->maskDebugMessage('Could not find order.'));
         }
 
         $order = $orders->getFirstItem();
 
-        // Verify that the order correspoding to the reference is the one that correspond to the MPGS Id to avoid order spoofing.
-        if ($order->getPayment()->getAdditionalInformation('mpgs_id') != $mpgsId) {
-            throw new Exception(__($helper->maskDebugMessages('MPGS Id Missmatch.')));
-        }
+//        // Verify that the order corresponding to the reference is the one that correspond to the MPGS Id to avoid order spoofing.
+//        if ($order->getIncrementId() != $mpgsId) {
+//            $config = $this->configFactory($this->getRequest()->getParam('type', ''));
+//            Mage::throwException($config->maskDebugMessage('MPGS Id Missmatch.'));
+//        }
 
         return $order;
     }
@@ -350,12 +347,13 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
             throw new Exception(__('Authorization not provided'));
         }
 
-        $WebhookSecret = Mage::getSingleton('mpgs/config')->getWebhookSecret();
-        if (empty($WebhookSecret)) {
+        $config = $this->configFactory($this->getRequest()->getParam('type', ''));
+        $webhookSecret = $config->getWebhookSecret();
+        if (empty($webhookSecret)) {
             throw new Exception(__('Webhook Disabled'));
         }
 
-        if ($WebhookSecret !== $requestSecret) {
+        if ($webhookSecret !== $requestSecret) {
             throw new Exception(__('Authorization failed'));
         }
     }
@@ -391,6 +389,25 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
     }
 
     /**
+     * @param string $type
+     * @return Mastercard_Mpgs_Model_Config_Amex|Mastercard_Mpgs_Model_Config_Hosted
+     * @throws Exception
+     */
+    protected function configFactory($type)
+    {
+        $config = array(
+            'amex' => Mage::getSingleton('mpgs/config_amex'),
+            'hosted' => Mage::getSingleton('mpgs/config_hosted')
+        );
+
+        if (!isset($config[$type])) {
+            throw new Exception('Invalid payment config type');
+        }
+
+        return $config[$type];
+    }
+
+    /**
      * Dispatch MPGS Webhook Notification request.
      *
      * @return Zend_Controller_Response_Abstract
@@ -407,36 +424,33 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
             $txnInfo = $this->getData();
             $this->validateWebhookInfo($txnInfo);
 
+            /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
             $restAPI = Mage::getSingleton(
                 'mpgs/mpgsApi_rest', array(
-                'config' => Mage::getSingleton('mpgs/config_hosted')
+                    'config' => $this->configFactory($this->getRequest()->getParam('type', ''))
                 )
             );
-            $mpgsId = $txnInfo ['order'] ['id'];
-            $txnId = $txnInfo ['transaction'] ['id'];
+            $mpgsId = $txnInfo['order']['id'];
+            $txnId = $txnInfo['transaction']['id'];
             $txnInfo = $restAPI->retrieve_transaction($mpgsId, $txnId);
 
-            $order = $this->getOrderbyMpgsRef($mpgsId, $txnInfo ['order'] ['reference']);
+            $order = $this->getOrderbyMpgsRef($mpgsId, $txnInfo['order']['reference']);
 
             $headerid = $this->getRequest()->getHeader(static::X_HEADER_ID);
 
-            // Check if the transaction was already dispachet to avoid double notifications.
-            // No exeption trowed because this is a normal situation in Internet where retries can be attempted.
-            if (! $this->isTxnIdPresent($order, $txnInfo ['transaction'] ['id'])) {
-                // Proccess the webhook info
+            // Check if the transaction was already dispatched to avoid double notifications.
+            // No exception trowed because this is a normal situation in Internet where retries can be attempted.
+            if (!$this->isTxnIdPresent($order, $txnInfo['transaction']['id'])) {
                 $this->updateOrderDetails($order, $txnInfo, $headerid);
             }
-        } catch (\Exception $e) {
-            $errorMessage = sprintf(__("Mastercard Mpgs WebHook Exception: '%s'"), $e->getMessage());
-            $response->setHttpResponseCode(400);
 
-            $helper = Mage::helper('mpgs');
-            return $response->setBody($helper->maskDebugMessages($errorMessage));
+            $response->setHttpResponseCode(200);
+
+        } catch (Exception $e) {
+            Mage::logException($e);
+            $response->setHttpResponseCode(400);
         }
 
-        $response->setHttpResponseCode(200);
-
         return $response->setBody('');
-
     }
 }

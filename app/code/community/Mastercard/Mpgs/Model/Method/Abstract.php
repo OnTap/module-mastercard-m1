@@ -74,9 +74,9 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
             $baseCurrency = $paymentInfo->getQuote()->getStore()->getBaseCurrencyCode();
         }
 
-        if (! $this->canUseForCurrency($baseCurrency)) {
-            $helper = Mage::helper('mpgs');
-            Mage::throwException(Mage::helper('payment')->__($helper->maskDebugMessages('Selected payment type is not allowed for currency.')));
+        if (!$this->canUseForCurrency($baseCurrency)) {
+            $msg = $this->getConfig()->maskDebugMessage('Selected payment type is not allowed for currency.');
+            Mage::throwException($msg);
         }
 
         return $this;

@@ -138,30 +138,6 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
     }
 
     /**
-     * Retrieve MPGS Webhook Notifications URL.
-     *
-     * @return string
-     */
-    public function getWebhookNotificationUrl() 
-    {
-        $webhookSecret = $this->getWebhookSecret();
-        if (empty($webhookSecret)) {
-            return;
-        }
-
-        $url = Mage::getStoreConfig($this->pathWebhookUrl);
-        if (! empty($url)) {
-            return $url;
-        }
-
-        return Mage::getUrl(
-            self::WEB_HOOK_UPDATE_URL, array (
-                '_secure' => true
-            ) 
-        );
-    }
-
-    /**
      * Retrieve Supported Currency.
      *
      * @return string
@@ -179,5 +155,17 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
     public function isDebugEnabled() 
     {
         return Mage::getStoreConfig($this->pathDebug);
+    }
+
+    /**
+     * @param $msg
+     * @return string
+     */
+    public function maskDebugMessage($msg)
+    {
+        if ($this->isDebugEnabled()) {
+            return $msg;
+        }
+        return "Internal Error";
     }
 }

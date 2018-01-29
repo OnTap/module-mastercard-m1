@@ -13,4 +13,28 @@ class Mastercard_Mpgs_Model_Config_Hosted extends Mastercard_Mpgs_Model_Config
     protected $pathApiPassword = 'payment/Mastercard_hosted/api_password';
     protected $pathEndpointUrl = 'payment/Mastercard_hosted/end_point_url';
     protected $pathWebhookSecret = 'payment/Mastercard_hosted/webhook_secret';
+
+    /**
+     * Retrieve MPGS Webhook Notifications URL.
+     * @return string|null
+     */
+    public function getWebhookNotificationUrl()
+    {
+        $webhookSecret = $this->getWebhookSecret();
+        if (empty($webhookSecret)) {
+            return null;
+        }
+
+        $url = Mage::getStoreConfig($this->pathWebhookUrl);
+        if (!empty($url)) {
+            return $url;
+        }
+
+        return Mage::getUrl(
+            self::WEB_HOOK_UPDATE_URL, array(
+                '_secure' => true,
+                'type' => 'hosted'
+            )
+        );
+    }
 }
