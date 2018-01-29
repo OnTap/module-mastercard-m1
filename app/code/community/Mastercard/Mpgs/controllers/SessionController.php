@@ -6,6 +6,8 @@ class Mastercard_Mpgs_SessionController extends Mastercard_Mpgs_Controller_JsonR
 {
     /**
      * Create Session Action
+     * @throws Mage_Core_Exception
+     * @throws Exception
      */
     public function createAction()
     {
@@ -44,6 +46,9 @@ class Mastercard_Mpgs_SessionController extends Mastercard_Mpgs_Controller_JsonR
 
     /**
      * Action
+     * @throws Mage_Core_Exception
+     * @throws Zend_Controller_Response_Exception
+     * @throws Exception
      */
     public function walletAction()
     {

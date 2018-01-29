@@ -10,6 +10,7 @@ class Mastercard_Mpgs_Amex_HpfController extends Mastercard_Mpgs_Controller_Json
 
     /**
      * @return Mage_Core_Controller_Varien_Action
+     * @throws Mage_Core_Exception
      */
     public function placeOrderAction()
     {

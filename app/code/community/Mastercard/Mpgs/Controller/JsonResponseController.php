@@ -20,7 +20,7 @@ abstract class Mastercard_Mpgs_Controller_JsonResponseController extends Mage_Co
     /**
      * Get one page checkout model
      *
-     * @return Mage_Checkout_Model_Type_Onepage
+     * @return Mage_Checkout_Model_Type_Onepage|Mage_Core_Model_Abstract
      */
     public function getOnepage()
     {
@@ -30,7 +30,7 @@ abstract class Mastercard_Mpgs_Controller_JsonResponseController extends Mage_Co
     /**
      * Get checkout session model instance
      *
-     * @return Mage_Checkout_Model_Session
+     * @return Mage_Checkout_Model_Session|Mage_Core_Model_Abstract
      */
     public function getSession()
     {

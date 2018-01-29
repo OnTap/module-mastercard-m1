@@ -7,6 +7,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     /**
      * @param Mage_Sales_Model_Quote_Payment $payment
      * @param array $data
+     * @throws Mage_Core_Exception
      */
     public function addWallet(Mage_Sales_Model_Quote_Payment $payment, $data)
     {
@@ -16,6 +17,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     /**
      * @param Mage_Sales_Model_Quote_Payment $payment
      * @param array $data
+     * @throws Mage_Core_Exception
      */
     public function addSession(Mage_Sales_Model_Quote_Payment $payment, $data)
     {
@@ -481,6 +483,16 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     public function addVoidTxnPayment($payment, $txnInfo, $parentTxnId)
     {
         return $this->addTxnPayment($payment, $txnInfo, Mage_Sales_Model_Order_Payment_Transaction::TYPE_VOID, true, $parentTxnId, true);
+    }
+
+    /**
+     * @param $payment
+     * @param $txnInfo
+     * @return mixed
+     */
+    public function addPayTnxPayment($payment, $txnInfo)
+    {
+        return $this->addTxnPayment($payment, $txnInfo, Mage_Sales_Model_Order_Payment_Transaction::TYPE_PAYMENT, true);
     }
 
     /**

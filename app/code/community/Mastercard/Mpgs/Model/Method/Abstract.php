@@ -60,6 +60,7 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
      * Validate payment method information object
      *
      * @return Mastercard_Mpgs_Model_Method_Abstract
+     * @throws Mage_Core_Exception
      */
     public function validate() 
     {

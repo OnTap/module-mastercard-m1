@@ -107,6 +107,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * @param Mage_Sales_Model_Quote $quote
      *
      * @return array
+     * @throws Exception
      */
     public function create_checkout_session($mpgs_id, $quote)
     {
@@ -135,6 +136,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * @param Mage_Sales_Model_Quote $quote
      * @param string $type
      * @return array
+     * @throws Exception
      */
     public function openWallet($session, $quote, $type)
     {
@@ -150,6 +152,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 
     /**
      * @return array
+     * @throws Exception
      */
     public function createSession()
     {
@@ -165,6 +168,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * @param Varien_Object $params
      * @param Mage_Sales_Model_Quote $quote
      * @return array
+     * @throws Exception
      */
     public function updateSessionFromWallet(Varien_Object $params, Mage_Sales_Model_Quote $quote)
     {
@@ -184,6 +188,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
     /**
      * @param Mage_Sales_Model_Order $order
      * @return array
+     * @throws Exception
      */
     public function authorizeFromSession(Mage_Sales_Model_Order $order)
     {
@@ -210,6 +215,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
     /**
      * @param Mage_Sales_Model_Order $order
      * @return array
+     * @throws Exception
      */
     public function payFromSession(Mage_Sales_Model_Order $order)
     {
@@ -238,6 +244,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      *
      * @param string $mpgs_id
      * @return array
+     * @throws Exception
      */
     public function retrieve_order( $mpgs_id ) 
     {
@@ -251,6 +258,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      *
      * @param string $mpgs_id
      * @return array
+     * @throws Exception
      */
     public function retrieve_transaction( $mpgs_id, $txn_id ) 
     {
@@ -266,6 +274,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * @param float $amount
      * @param string $currency
      * @return array
+     * @throws Exception
      */
     public function capture_order( $mpgs_id, $amount, $currency ) 
     {
@@ -286,6 +295,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * @param float $amount
      * @param string $currency
      * @return array
+     * @throws Exception
      */
     public function refund_order( $mpgs_id, $amount, $currency ) 
     {
@@ -305,6 +315,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
      * @param string $mpgs_id
      * @param string $txnid
      * @return array
+     * @throws Exception
      */
     public function void_order( $mpgs_id, $txnid ) 
     {

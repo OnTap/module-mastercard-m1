@@ -32,7 +32,7 @@ class Mastercard_Mpgs_Block_Checkout_Button_Amex_Direct extends Mastercard_Mpgs_
     /**
      * Return Mpgs config instance.
      *
-     * @return Mastercard_Mpgs_Model_Config_Amex
+     * @return Mage_Core_Model_Abstract|Mastercard_Mpgs_Model_Config_Amex
      */
     public function getConfig()
     {

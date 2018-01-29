@@ -42,6 +42,8 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
      *
      * @param $order
      * @param array $txnInfo
+     * @throws Exception
+     * @throws Mage_Core_Exception
      */
     protected function createCreditMemo($order, $txnInfo)
     {
@@ -125,6 +127,7 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
      * Voids a capture.
      *
      * @param $order
+     * @throws Mage_Core_Exception
      */
     protected function voidCapture($order, $txnInfo)
     {
@@ -174,6 +177,9 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
      * Voids a refund.
      *
      * @param $order
+     * @param $txnInfo
+     * @throws Exception
+     * @throws Mage_Core_Exception
      */
     protected function voidRefund($order, $txnInfo)
     {
@@ -241,6 +247,8 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
      * @param $order
      * @param array $txnInfo
      * @param string $headerid
+     * @throws Exception
+     * @throws Mage_Core_Exception
      */
     protected function updateOrderDetails($order, $txnInfo, $headerid)
     {
@@ -386,6 +394,7 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
      * Dispatch MPGS Webhook Notification request.
      *
      * @return Zend_Controller_Response_Abstract
+     * @throws Zend_Controller_Response_Exception
      */
     public function updateAction() 
     {

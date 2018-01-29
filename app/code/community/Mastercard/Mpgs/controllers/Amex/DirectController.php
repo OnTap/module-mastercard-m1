@@ -6,7 +6,9 @@
 class Mastercard_Mpgs_Amex_DirectController extends Mastercard_Mpgs_Controller_JsonResponseController
 {
     /**
-     * Places the order
+     * @return $this
+     * @throws Zend_Controller_Response_Exception
+     * @throws Mage_Core_Exception
      */
     public function placeOrderAction()
     {
@@ -25,7 +27,7 @@ class Mastercard_Mpgs_Amex_DirectController extends Mastercard_Mpgs_Controller_J
 
         if ($data->getException()) {
             $this->getResponse()->setHttpResponseCode(503);
-            return;
+            return $this;
         }
 
         $method->validate();
@@ -40,7 +42,7 @@ class Mastercard_Mpgs_Amex_DirectController extends Mastercard_Mpgs_Controller_J
                 'exception' => $e->getMessage()
                 )
             );
-            return;
+            return $this;
         }
 
         $next = Mage::getUrl(
@@ -54,5 +56,7 @@ class Mastercard_Mpgs_Amex_DirectController extends Mastercard_Mpgs_Controller_J
             'success_url' => $next
             )
         );
+
+        return $this;
     }
 }

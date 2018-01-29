@@ -37,7 +37,7 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
     /**
      * Return Mpgs config instance.
      *
-     * @return Mastercard_Mpgs_Model_Config_Hosted
+     * @return Mastercard_Mpgs_Model_Config_Hosted|Mage_Core_Model_Abstract
      */
     public function getConfig()
     {
@@ -57,6 +57,7 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
 
     /**
      * @param $payment
+     * @throws Mage_Core_Exception
      */
     protected function verifyResultCode($payment)
     {
@@ -74,6 +75,8 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
      * @param Varien_Object $payment
      * @param string $amount
      * @return Mastercard_Mpgs_Model_Method_Hosted
+     * @throws Exception
+     * @throws Mage_Core_Exception
      * @author Rafel Waldo Delgado Doblas
      */
     public function capture(Varien_Object $payment, $amount)
@@ -117,6 +120,7 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
      * @param string $amount
      * @return Mastercard_Mpgs_Model_Method_Hosted
      * @author Rafel Waldo Delgado Doblas
+     * @throws Mage_Core_Exception
      */
     public function authorize(Varien_Object $payment, $amount)
     {

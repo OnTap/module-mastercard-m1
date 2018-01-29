@@ -14,7 +14,7 @@ class Mastercard_Mpgs_Model_RestFactory
      * based on $payment object
      *
      * @param Varien_Object $payment
-     * @return Mastercard_Mpgs_Model_MpgsApi_Rest
+     * @return Mastercard_Mpgs_Model_MpgsApi_Rest|Mage_Core_Model_Abstract
      */
     public function get(Varien_Object $payment)
     {
