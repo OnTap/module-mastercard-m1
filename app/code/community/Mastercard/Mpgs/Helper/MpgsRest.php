@@ -272,7 +272,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
             $iteminfo['sku'] = $item->getSku();
             // XXX: Item is always sent with qty = 1 because
             // XXX: otherwise we would run into rounding errors when row total is calculated
-            $iteminfo['unitPrice'] = sprintf('%.2F', $item->getRowTotal() - $item->getDiscountAmount());
+            $iteminfo['unitPrice'] = sprintf('%.2F', $item->getRowTotalInclTax() - $item->getDiscountAmount());
             $iteminfo['quantity'] = 1;
             $data['item'][] = $iteminfo;
         }
@@ -311,7 +311,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
             $iteminfo['sku'] = $item->getSku();
             // XXX: Item is always sent with qty = 1 because
             // XXX: otherwise we would run into rounding errors when row total is calculated
-            $iteminfo['unitPrice'] = sprintf('%.2F', $item->getRowTotal() - $item->getDiscountAmount());
+            $iteminfo['unitPrice'] = sprintf('%.2F', $item->getRowTotalInclTax() - $item->getDiscountAmount());
             $iteminfo['quantity'] = 1;
             $order['item'][$i] = $iteminfo;
             ++$i;
