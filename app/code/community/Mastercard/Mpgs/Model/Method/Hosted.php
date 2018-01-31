@@ -81,32 +81,68 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
     public function capture(Varien_Object $payment, $amount)
     {
         parent::capture($payment, $amount);
+
+        /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
+        $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
+
+        /** @var Mastercard_Mpgs_Helper_MpgsRest $helper */
         $helper = Mage::helper('mpgs/mpgsRest');
 
         $txnAuth = $payment->getAuthorizationTransaction();
+
+        // Webhook has updated this already
         $captureInfo = $payment->getAdditionalInformation('webhook_info');
-        if (empty($captureInfo)) {
-            /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
-            $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
-
-            $mpgs_id = $payment->getAdditionalInformation('mpgs_id');
-            $orderInfo = $restAPI->retrieve_order($mpgs_id);
-            $helper->updatePaymentInfo($payment, $orderInfo);
-
-            $currency = $payment->getOrder()->getStore()->getBaseCurrencyCode();
-            $captureInfo = $restAPI->capture_order($mpgs_id, $amount, $currency);
-
-            if (empty($txnAuth)) {
-                // Creates an auth txn on magento side
-                $this->verifyResultCode($payment);
-                $authTxnInfo = $helper->searchTxnByType($orderInfo, 'AUTHORIZATION');
-                $txnAuth = $helper->addAuthTxnPayment($payment, $authTxnInfo, $helper->isAllPaid($payment, $captureInfo));
-            }
+        if (!empty($captureInfo)) {
+            $helper->updateTransferInfo($payment, $captureInfo);
+            $helper->addCaptureTxnPayment($payment, $captureInfo, $txnAuth->getTxnId(), $helper->isAllPaid($payment, $captureInfo));
+            return $this;
         }
 
-        // Creates an capture txn on magento side
-        $helper->updateTransferInfo($payment, $captureInfo);
-        $helper->addCaptureTxnPayment($payment, $captureInfo, $txnAuth->getTxnId(), $helper->isAllPaid($payment, $captureInfo));
+        /** @var Mastercard_Mpgs_Model_Method_WalletInterface|Mastercard_Mpgs_Model_Method_Abstract $method */
+        $method = $payment->getMethodInstance();
+        $info = $method->getInfoInstance();
+
+        /** @var Mage_Sales_Model_Order $order */
+        $order = $info->getOrder();
+
+        $orderInfo = $restAPI->retrieve_order($order->getIncrementId());
+        $helper->updateTransferInfo($payment, $orderInfo);
+
+        if (empty($txnAuth)) {
+            $this->verifyResultCode($payment);
+
+            if (!isset($orderInfo['transaction']['id']) && is_array($orderInfo['transaction'])) {
+                foreach ($orderInfo['transaction'] as $key => $txn) {
+                    $txn['transaction']['id'] = sprintf('%s-%s', $order->getIncrementId(), $key);
+                    switch ($txn['transaction']['type']) {
+                        default:
+                            throw new Exception('Transaction type not recognised.');
+                            break;
+
+                        case 'AUTHORIZATION':
+                            $txnAuth = $helper->addTxnPayment($payment, $txn, Mage_Sales_Model_Order_Payment_Transaction::TYPE_AUTH, true);
+                            break;
+
+                        case 'CAPTURE':
+                            if (!$txnAuth) {
+                                throw new Exception('Capturing without authorisation.');
+                            }
+                            $helper->addTxnPayment($payment, $txn, Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE, true, $txnAuth->getTxnId());
+                            break;
+                    }
+                }
+            } else {
+                $helper->addPayTnxPayment($payment, $orderInfo);
+            }
+        } else {
+            $captureInfo = $restAPI->capture_order(
+                $order->getIncrementId(),
+                $amount,
+                $order->getOrderCurrencyCode()
+            );
+            $helper->updateTransferInfo($payment, $captureInfo);
+            $helper->addCaptureTxnPayment($payment, $captureInfo, $txnAuth->getTxnId(), $helper->isAllPaid($payment, $captureInfo));
+        }
 
         return $this;
     }

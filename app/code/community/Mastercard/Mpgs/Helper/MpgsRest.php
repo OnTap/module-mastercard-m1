@@ -506,7 +506,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      * @param null $closeParent
      * @return mixed
      */
-    protected function addTxnPayment($payment, $txnInfo, $type, $close, $parentTxnId = null, $closeParent = null)
+    public function addTxnPayment($payment, $txnInfo, $type, $close, $parentTxnId = null, $closeParent = null)
     {
         $payment->setSkipTransactionCreation(false);
 
