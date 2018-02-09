@@ -75,10 +75,10 @@ class Mastercard_Mpgs_Model_MpgsApi_Validator extends Varien_Object
      * @var array
      */
     private $resultCode = array(
-        self::SUCCESS => 'The operation was successfully processed',
-        self::PENDING => 'The operation is currently in progress or pending processing',
-        self::FAILURE => 'The operation was declined or rejected by the gateway, acquirer or issuer',
-        self::UNKNOWN => 'The result of the operation is unknown',
+        self::SUCCESS => 'The operation was successfully processed.',
+        self::PENDING => 'The operation is currently in progress or pending processing.',
+        self::FAILURE => 'The operation was declined or rejected by the gateway, acquirer or issuer.',
+        self::UNKNOWN => 'The result of the operation is unknown.',
     );
 
     const SUCCESS = 'SUCCESS';
@@ -109,7 +109,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Validator extends Varien_Object
                 case self::UNKNOWN:
                 case self::PENDING:
                 case self::FAILURE:
-                    $errors[] = $this->resultCode[$response['result']];
+                    //$errors[] = $this->resultCode[$response['result']];
                     $errors[] = $this->gatewayCode[$response['response']['gatewayCode']];
                     break;
             }

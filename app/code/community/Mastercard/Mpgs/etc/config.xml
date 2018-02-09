@@ -86,7 +86,7 @@
                     <url>https://na-gateway.mastercard.com/</url>
                 </northamerica>
                 <australia>
-                    <name>Australia</name>
+                    <name>UAT</name>
                     <url>https://mtf.gateway.mastercard.com/</url>
                 </australia>
                 <other>
