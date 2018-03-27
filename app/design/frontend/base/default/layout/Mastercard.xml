@@ -8,4 +8,12 @@
                    template="Mastercard/checkout/placeOrder.phtml"/>
         </reference>
     </checkout_onepage_review>
+    <checkout_cart_index>
+        <reference name="checkout.cart.methods">
+            <block type="mpgs/cart_placeOrder" name="checkout.cart.methods.onepage.wallet" template="Mastercard/cart/placeOrder.phtml" after="checkout.cart.methods.onepage" before="checkout.cart.methods.multishipping">
+                <block type="mpgs/cart_button_amex_hpf" name="Mastercard_amex_hpf" template="Mastercard/amex/hpf_button.phtml" />
+                <block type="mpgs/cart_button_amex_direct" name="Mastercard_amex_direct" template="Mastercard/amex/direct_button.phtml" />
+            </block>
+        </reference>
+    </checkout_cart_index>
 </layout>

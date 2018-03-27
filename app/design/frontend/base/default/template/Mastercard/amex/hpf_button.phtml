@@ -7,7 +7,7 @@
 
         initialize: function (config) {
             this.config = config;
-            if (window.payment.currentMethod === 'Mastercard_amex') {
+            if (window.payment === undefined || (window.payment && window.payment.currentMethod === 'Mastercard_amex')) {
                 this.loadAdapter();
 
                 new MutationObserver(this.adapterLoaded)

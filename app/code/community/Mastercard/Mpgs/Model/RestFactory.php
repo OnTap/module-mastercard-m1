@@ -20,7 +20,7 @@ class Mastercard_Mpgs_Model_RestFactory
     {
         return Mage::getSingleton(
             'mpgs/mpgsApi_rest', array(
-            'config' => Mage::getSingleton($this->methodConfigMapper[$payment->getMethod()])
+                'config' => Mage::getSingleton($this->methodConfigMapper[$payment->getMethod()])
             )
         );
     }
