@@ -2,6 +2,7 @@
 /**
  * Copyright (c) 2018. On Tap Networks Limited.
  */
+
 class Mastercard_Mpgs_OrderController extends Mastercard_Mpgs_Controller_JsonResponseController
 {
     /**

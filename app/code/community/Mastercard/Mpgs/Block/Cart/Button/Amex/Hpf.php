@@ -18,7 +18,11 @@ class Mastercard_Mpgs_Block_Cart_Button_Amex_Hpf extends Mastercard_Mpgs_Block_C
                 'env' => $this->getConfig()->getEnv(),
                 'grand_total' => $quote->getGrandTotal(),
                 'currency' => $quote->getQuoteCurrencyCode(),
-                'place_order_url' => Mage::getUrl('mastercard/amex_hpf/placeOrder', array('_secure' => true)),
+                'place_order_url' => Mage::getUrl('mastercard/review/index', array('_secure' => true)),
+                'save_payment_url' => Mage::getUrl('mastercard/session/setPaymentInformation', array(
+                    '_secure' => true,
+                    'method' => Mastercard_Mpgs_Model_Method_Amex::METHOD_NAME
+                )),
             )
         );
     }

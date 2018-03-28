@@ -16,4 +16,18 @@
             </block>
         </reference>
     </checkout_cart_index>
+    <mastercard_review_index translate="label">
+        <label>Order Summary</label>
+        <remove name="left"/>
+        <reference name="root">
+            <action method="setTemplate"><template>page/2columns-right.phtml</template></action>
+        </reference>
+        <reference name="right">
+            <action method="unsetChildren" />
+
+        </reference>
+        <reference name="content">
+            <block type="mpgs/review" name="checkout.review" template="Mastercard/review.phtml" />
+        </reference>
+    </mastercard_review_index>
 </layout>

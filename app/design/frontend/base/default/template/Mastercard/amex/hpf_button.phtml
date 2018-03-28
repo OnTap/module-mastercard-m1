@@ -70,13 +70,41 @@
 
         aecInteractionFinished: function (response) {
             this.debug('AEC interaction completed', response);
+
             if (response.status !== 'ok' || !response.session) {
                 alert('Unexpected AEC status, please try again later.');
             } else {
                 $('amex-express-checkout').hide();
                 $('mpgs-please-wait').show();
-                window.location.href = this.config.place_order_url + '?' + Object.toQueryString(response.session);
+                new Ajax.Request(this.config.save_payment_url, {
+                    method: 'post',
+                    parameters: $H(response.session),
+                    onSuccess: this.didSavePaymentHandler.bind(this),
+                    onFailure: this.didFail.bind(this),
+                    onLoading: function () {
+                        $('amex-express-checkout').hide();
+                        $('mpgs-please-wait').show();
+                    }
+                });
             }
+        },
+
+        didSavePaymentHandler: function (aecData) {
+            $('amex-express-checkout').hide();
+            $('mpgs-please-wait').show();
+            window.location.href = this.config.place_order_url;
+        },
+
+        didFail: function (transport) {
+            if (transport.responseJSON.exception) {
+                console.error('Backend exception: %s', transport.responseJSON.exception);
+            }
+
+            alert('<?php echo $this->__("Error in Amex Express Checkout, please try again later.") ?>');
+
+            $('amex-express-checkout').show();
+            $('mpgs-please-wait').hide();
+            $('mpgs-loading').hide();
         },
 
         debug: function () {

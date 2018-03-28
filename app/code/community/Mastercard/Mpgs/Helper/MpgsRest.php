@@ -5,6 +5,79 @@
 class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
 {
     /**
+     * @var array
+     */
+    protected $_addressMap = array(
+        'firstName' => 'firstname',
+        'lastName' => 'lastname',
+        'city' => 'city',
+        'postcodeZip' => 'postcode',
+        'street' => 'street',
+        'mobilePhone' => 'telephone',
+        'email' => 'email',
+        'stateProvince' => 'region',
+        'country' => 'country_id',
+    );
+
+    /**
+     * @param Mage_Sales_Model_Quote_Payment $payment
+     * @param array $data
+     * @throws Mage_Core_Exception
+     */
+    public function addAddressData(Mage_Sales_Model_Quote_Payment $payment, $data)
+    {
+        $customer = $data['customer'];
+        $quote = $payment->getQuote();
+
+        $billing = array_merge($data['billing']['address'], $customer);
+        $billingAddress = new Varien_Object();
+        Varien_Object_Mapper::accumulateByMap($billing, $billingAddress, $this->_addressMap);
+
+        $quoteBillingAddress = $quote->getBillingAddress();
+        foreach (array_values($this->_addressMap) as $key) {
+            $quoteBillingAddress->setDataUsingMethod($key, $billingAddress->getData($key));
+        }
+        $this->fixRegionAndCountry($quoteBillingAddress);
+
+
+        $shipping = array_merge($data['shipping']['address'], $customer);
+        $shippingAddress = new Varien_Object();
+        Varien_Object_Mapper::accumulateByMap($shipping, $shippingAddress, $this->_addressMap);
+
+        $quoteShippingAddress = $quote->getShippingAddress();
+        foreach (array_values($this->_addressMap) as $key) {
+            $quoteShippingAddress->setDataUsingMethod($key, $shippingAddress->getData($key));
+        }
+        $this->fixRegionAndCountry($quoteShippingAddress);
+    }
+
+    /**
+     * @param Mage_Sales_Model_Quote_Address $quoteAddress
+     */
+    protected function fixRegionAndCountry(Mage_Sales_Model_Quote_Address $quoteAddress)
+    {
+        /** @var Mage_Directory_Model_Country $country */
+        $country = Mage::getModel('directory/country')
+            ->loadByCode($quoteAddress->getCountryId());
+
+        if ($country->getCountryId()) {
+            $quoteAddress->setCountryId($country->getCountryId());
+        }
+
+        $regions = Mage::getModel('directory/country')
+            ->loadByCode($quoteAddress->getCountryId())
+            ->getRegionCollection()
+            ->addRegionCodeOrNameFilter($quoteAddress->getRegion())
+            ->setPageSize(1);
+
+        $region = $regions->getFirstItem();
+        if ($region->getId()) {
+            $quoteAddress->setRegionId($region->getId());
+            $quoteAddress->setRegion($region->getName());
+        }
+    }
+
+    /**
      * @param Mage_Sales_Model_Quote_Payment $payment
      * @param array $data
      * @throws Mage_Core_Exception

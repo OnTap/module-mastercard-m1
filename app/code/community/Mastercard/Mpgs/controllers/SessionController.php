@@ -2,66 +2,56 @@
 /**
  * Copyright (c) 2017. On Tap Networks Limited.
  */
+
 class Mastercard_Mpgs_SessionController extends Mastercard_Mpgs_Controller_JsonResponseController
 {
     /**
-     * Create Session Action
-     * @throws Mage_Core_Exception
-     * @throws Exception
-     */
-    public function createAction()
-    {
-        $cartId = $this->getRequest()->getParam('cartId');
-
-        $quote = $this->getQuote();
-
-        if ($cartId != $quote->getId()) {
-            Mage::throwException('Cart ID not found');
-        }
-
-        $quote->reserveOrderId();
-        $quote->save();
-
-        /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
-        $restAPI = Mage::getSingleton(
-            'mpgs/mpgsApi_rest', array(
-                'config' => Mage::getSingleton('mpgs/config_hosted')
-            )
-        );
-
-        $resData = $restAPI->create_checkout_session($quote->getReservedOrderId(), $quote);
-
-        $payment = $quote->getPayment();
-        $payment->setAdditionalInformation('successIndicator', $resData['successIndicator']);
-        $payment->setAdditionalInformation('mpgs_id', $quote->getReservedOrderId());
-        $payment->save();
-
-        $dataOut = array();
-        $dataOut['merchant'] = $resData['merchant'];
-        $dataOut['SessionID'] = $resData['session']['id'];
-        $dataOut['SessionVersion'] = $resData['session']['version'];
-
-        $this->_prepareDataJSON($dataOut);
-    }
-
-    /**
-     * Action
-     * @throws Mage_Core_Exception
      * @throws Zend_Controller_Response_Exception
      * @throws Exception
      */
-    public function walletAction()
+    public function createSessionAction()
     {
-        $payment = $this->getQuote()->getPayment();
+        $method = $this->getRequest()->getParam('method');
+        try {
+            if (!$method) {
+                throw new Exception('Payment method not selected.');
+            }
 
-        $returnData = new Varien_Object();
+            $payment = new Varien_Object(array(
+                'method' => $method
+            ));
 
-        /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
-        $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
-        $session = $restAPI->createSession();
+            /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
+            $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
+            $data = $restAPI->createSession();
+        } catch (Exception $e) {
+            $this->getResponse()->setHttpResponseCode(400);
+            $data = array(
+                'exception' => $e->getMessage()
+            );
+        }
+
+        $this->_prepareDataJSON($data);
+    }
+
+    /**
+     * @throws Mage_Core_Exception
+     */
+    public function openWalletAction()
+    {
+        $session = array(
+            'session' => array(
+                'id' => $this->getRequest()->getParam('id'),
+                'updateStatus' => $this->getRequest()->getParam('updateStatus'),
+                'version' => $this->getRequest()->getParam('version')
+            )
+        );
 
         $payment = $this->getQuote()->getPayment();
         $payment->setAdditionalInformation('session', $session);
+        $payment->setMethod(Mastercard_Mpgs_Model_Method_Amex::METHOD_NAME);
+
+        $returnData = new Varien_Object();
 
         /** @var Mastercard_Mpgs_Model_Method_WalletInterface $method */
         $method = $payment->getMethodInstance();
@@ -69,15 +59,81 @@ class Mastercard_Mpgs_SessionController extends Mastercard_Mpgs_Controller_JsonR
             $method->openWallet($payment, $returnData);
         }
 
-        if ($returnData->getException()) {
-            $this->getResponse()->setHttpResponseCode(503);
-        }
-
-        $this->getQuote()->save();
-
         $this->_prepareDataJSON(
             $returnData->toArray()
         );
+    }
+
+    /**
+     * @throws Zend_Controller_Response_Exception
+     */
+    public function setPaymentInformationAction()
+    {
+        $data = array();
+
+        try {
+            $session = array(
+                'id' => $this->getRequest()->getParam('id'),
+                'updateStatus' => $this->getRequest()->getParam('updateStatus'),
+                'version' => $this->getRequest()->getParam('version')
+            );
+
+            $payment = $this->getQuote()->getPayment();
+            $payment->setAdditionalInformation('session', $session);
+            $payment->setMethod(Mastercard_Mpgs_Model_Method_Amex::METHOD_NAME);
+
+            $this->getQuote()->save();
+
+        } catch (Exception $e) {
+            $this->getResponse()->setHttpResponseCode(400);
+            $data = array(
+                'exception' => $e->getMessage()
+            );
+        }
+
+        $this->_prepareDataJSON($data);
+    }
+
+    /**
+     * @return $this
+     * @throws Mage_Core_Exception
+     * @throws Zend_Controller_Response_Exception
+     */
+    public function updateSessionFromWalletAction()
+    {
+        $quote = $this->getOnepage()->getQuote();
+        //$quote->collectTotals();
+
+        $payment = $quote->getPayment();
+
+        /** @var Mastercard_Mpgs_Model_Method_WalletInterface|Mastercard_Mpgs_Model_Method_Abstract $method */
+        $method = $payment->getMethodInstance();
+
+        $data = new Varien_Object();
+        $data->addData($this->getRequest()->getParams());
+        $method->updateSessionFromWallet($payment, $data);
+
+        if ($data->getException()) {
+            $this->getResponse()->setHttpResponseCode(503);
+            return $this;
+        }
+
+        $method->validate();
+        $quote->save();
+
+        $next = Mage::getUrl(
+            'mastercard/review/index', array(
+                '_secure' => true
+            )
+        );
+
+        $this->_prepareDataJSON(
+            array(
+                'success_url' => $next
+            )
+        );
+
+        return $this;
     }
 
     /**

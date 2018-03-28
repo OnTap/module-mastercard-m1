@@ -105,13 +105,13 @@
                     </modules>
                 </args>
             </checkout>
-            <webhook>
+            <mastercard>
                 <use>standard</use>
                 <args>
                     <module>Mastercard_Mpgs</module>
                     <frontName>mastercard</frontName>
                 </args>
-            </webhook>
+            </mastercard>
         </routers>
         <translate>
             <modules>

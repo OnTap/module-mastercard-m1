@@ -17,4 +17,10 @@ interface Mastercard_Mpgs_Model_Method_WalletInterface
      * @return void
      */
     public function updateSessionFromWallet(Mage_Sales_Model_Quote_Payment $payment, Varien_Object $params);
+
+    /**
+     * @param Mage_Sales_Model_Quote_Payment $payment
+     * @return void
+     */
+    public function getAddressDataFromSession(Mage_Sales_Model_Quote_Payment $payment);
 }

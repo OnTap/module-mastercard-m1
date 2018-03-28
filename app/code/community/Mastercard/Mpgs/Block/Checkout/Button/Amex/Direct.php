@@ -18,13 +18,20 @@ class Mastercard_Mpgs_Block_Checkout_Button_Amex_Direct extends Mastercard_Mpgs_
      */
     public function getJsConfig()
     {
+        $params = array(
+            '_secure' => true,
+            'method' => Mastercard_Mpgs_Model_Method_Amex::METHOD_NAME
+        );
+
         return json_encode(
             array(
+                'save_payment_url' => Mage::getUrl('mastercard/session/setPaymentInformation', $params),
+                'wallet_url' => Mage::getUrl('mastercard/session/openWallet', $params),
+                'session_url' => Mage::getUrl('mastercard/session/createSession', $params),
+                'place_order_url' => Mage::getUrl('mastercard/amex_direct/placeOrder', array('_secure' => true)),
                 'component_url' => $this->getConfig()->getComponentUrl(),
-                'session_url' => Mage::getUrl('mastercard/session/wallet', array('_secure' => true)),
                 'client_id' => $this->getConfig()->getClientId(),
                 'env' => $this->getConfig()->getEnv(),
-                'place_order_url' => Mage::getUrl('mastercard/amex_direct/placeOrder', array('_secure' => true)),
             )
         );
     }

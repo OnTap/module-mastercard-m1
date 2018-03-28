@@ -28,6 +28,10 @@ class Mastercard_Mpgs_Block_Checkout_Button_Amex_Hpf extends Mastercard_Mpgs_Blo
                 'grand_total' => $quote->getGrandTotal(),
                 'currency' => $quote->getQuoteCurrencyCode(),
                 'place_order_url' => Mage::getUrl('mastercard/amex_hpf/placeOrder', array('_secure' => true)),
+                'save_payment_url' => Mage::getUrl('mastercard/session/setPaymentInformation', array(
+                    '_secure' => true,
+                    'method' => Mastercard_Mpgs_Model_Method_Amex::METHOD_NAME
+                )),
             )
         );
     }

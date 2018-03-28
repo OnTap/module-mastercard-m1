@@ -46,6 +46,23 @@ class Mastercard_Mpgs_Model_Method_Amex extends Mastercard_Mpgs_Model_Method_Abs
     /**
      * @inheritdoc
      */
+    public function getAddressDataFromSession(Mage_Sales_Model_Quote_Payment $payment)
+    {
+        /** @var Mastercard_Mpgs_Helper_MpgsRest $rest */
+        $rest = Mage::helper('mpgs/mpgsRest');
+
+        /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
+        $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
+
+        $session = $payment->getAdditionalInformation();
+        $response = $restAPI->getAddressDataFromSession($session);
+
+        $rest->addAddressData($payment, $response);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function openWallet(Mage_Sales_Model_Quote_Payment $payment, Varien_Object $data)
     {
         /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */

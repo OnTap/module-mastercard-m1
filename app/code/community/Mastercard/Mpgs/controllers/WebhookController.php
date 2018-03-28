@@ -2,6 +2,7 @@
 /**
  * Copyright (c) 2017. On Tap Networks Limited.
  */
+
 class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Action
 {
     const X_HEADER_SECRET = 'X-Notification-Secret';

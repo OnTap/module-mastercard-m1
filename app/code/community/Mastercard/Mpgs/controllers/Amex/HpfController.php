@@ -20,12 +20,6 @@ class Mastercard_Mpgs_Amex_HpfController extends Mastercard_Mpgs_Controller_Json
         $payment = $quote->getPayment();
         $payment->setMethod(Mastercard_Mpgs_Model_Method_Amex::METHOD_NAME);
 
-        $payment->setAdditionalInformation(
-            'session', array(
-            'id' => $this->getRequest()->getParam(self::SESSION_ID)
-            )
-        );
-
         try {
             $payment->save();
 
@@ -39,14 +33,14 @@ class Mastercard_Mpgs_Amex_HpfController extends Mastercard_Mpgs_Controller_Json
             $this->getSession()->addError($e->getMessage());
             return $this->_redirect(
                 'checkout/cart/index', array(
-                '_secure' => true
+                    '_secure' => true
                 )
             );
         }
 
         return $this->_redirect(
             'checkout/onepage/success', array(
-            '_secure' => true
+                '_secure' => true
             )
         );
     }

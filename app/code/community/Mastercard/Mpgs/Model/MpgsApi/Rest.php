@@ -133,6 +133,16 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 
     /**
      * @param array $session
+     * @return array
+     * @throws Exception
+     */
+    public function getAddressDataFromSession($session)
+    {
+        return $this->sender(self::MPGS_GET, 'session/' . $session['session']['id'], array());
+    }
+
+    /**
+     * @param array $session
      * @param Mage_Sales_Model_Quote $quote
      * @param string $type
      * @return array
@@ -182,7 +192,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 
         $session = $quote->getPayment()->getAdditionalInformation('session');
 
-        return $this->sender(self::MPGS_POST, 'session/' . $session['session']['id'], $data);
+        return $this->sender(self::MPGS_POST, 'session/' . $session['id'], $data);
     }
 
     /**
