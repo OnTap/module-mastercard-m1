@@ -18,16 +18,18 @@
     </checkout_cart_index>
     <mastercard_review_index translate="label">
         <label>Order Summary</label>
-        <remove name="left"/>
         <reference name="root">
-            <action method="setTemplate"><template>page/2columns-right.phtml</template></action>
-        </reference>
-        <reference name="right">
-            <action method="unsetChildren" />
-
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
         </reference>
         <reference name="content">
-            <block type="mpgs/review" name="checkout.review" template="Mastercard/review.phtml" />
+            <block type="mpgs/review" name="checkout.review" template="Mastercard/review.phtml">
+                <block type="checkout/cart_totals" name="checkout.review.details" as="details" template="Mastercard/review/details.phtml">
+                    <action method="addItemRender"><type>default</type><block>checkout/cart_item_renderer</block><template>checkout/onepage/review/item.phtml</template></action>
+                    <action method="addItemRender"><type>grouped</type><block>checkout/cart_item_renderer_grouped</block><template>checkout/onepage/review/item.phtml</template></action>
+                    <action method="addItemRender"><type>configurable</type><block>checkout/cart_item_renderer_configurable</block><template>checkout/onepage/review/item.phtml</template></action>
+                    <block type="checkout/cart_totals" name="checkout.review.details.totals" as="totals" template="checkout/onepage/review/totals.phtml"/>
+                </block>
+            </block>
         </reference>
     </mastercard_review_index>
 </layout>

@@ -30,7 +30,7 @@ class Mastercard_Mpgs_ReviewController extends Mage_Core_Controller_Front_Action
      */
     public function indexAction()
     {
-        try {
+//        try {
             $quote = $this->getQuote();
             $payment = $quote->getPayment();
 
@@ -62,21 +62,26 @@ class Mastercard_Mpgs_ReviewController extends Mage_Core_Controller_Front_Action
                 ->save();
 
             $this->loadLayout();
+
+            /** @var Mastercard_Mpgs_Block_Review $block */
+            $block = $this->getLayout()->getBlock('checkout.review');
+            $block->setQuote($quote);
+
             $this->getLayout()->getBlock('head')->setTitle($this->__('Order Summary'));
             $this->renderLayout();
 
             return;
 
-        } catch (Mage_Core_Exception $e) {
-            Mage::getSingleton('checkout/session')->addError($e->getMessage());
-        }  catch (Exception $e) {
-            Mage::getSingleton('checkout/session')->addError(
-                $this->__('Unable to initialize summary page.')
-            );
-            Mage::logException($e);
-        }
-
-        $this->_redirect('checkout/cart');
+//        } catch (Mage_Core_Exception $e) {
+//            Mage::getSingleton('checkout/session')->addError($e->getMessage());
+//        }  catch (Exception $e) {
+//            Mage::getSingleton('checkout/session')->addError(
+//                $this->__('Unable to initialize summary page.')
+//            );
+//            Mage::logException($e);
+//        }
+//
+//        $this->_redirect('checkout/cart');
     }
 
     /**
