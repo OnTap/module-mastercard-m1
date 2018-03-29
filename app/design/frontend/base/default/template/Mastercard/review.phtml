@@ -1,6 +1,9 @@
 <?php
     /** @var Mastercard_Mpgs_Block_Review $this */
 ?>
+
+<script type="text/javascript" src="<?php echo $this->getSkinUrl('js/opcheckout.js') ?>"></script>
+
 <div class="page-title">
     <h1><?php echo $this->__('Review Your Order') ?></h1>
 </div>
@@ -8,10 +11,13 @@
 <div class="info-set col2-set">
     <h3 class="legend"><?php echo $this->__('Shipping Information') ?></h3>
     <div class="col-1">
-        <div class="box">
-            <div class="box-content">
+        <div class="box shipping-address">
+            <div class="box-content" id="shipping-address-display">
                 <address><?php echo $this->renderAddress($this->getShippingAddress())?></address>
-                <a href="#"><?php echo $this->__('edit') ?></a>
+                <a href="#" id="edit-shipping-button"><?php echo $this->__('edit') ?></a>
+            </div>
+            <div class="box-content" id="shipping-address-form" style="display: none">
+                <?php echo $this->getChildHtml('shipping') ?>
             </div>
         </div>
     </div>
@@ -70,4 +76,63 @@
     </div>
 </div>
 
-<a href="<?php echo Mage::getUrl('mastercard/review/placeOrder')?>">Place Order</a>
+<div class="buttons-set">
+    <button type="button" id="place-order-button" class="button" title="<?php echo Mage::helper('core')->quoteEscape($this->__('Place Order')) ?>"><span><span><?php echo $this->__('Place Order') ?></span></span></button>
+</div>
+
+<script type="text/javascript">
+    var MpgsOrderReview = Class.create();
+    MpgsOrderReview.prototype = {
+        initialize: function () {
+            $('place-order-button').on('click', function (e) {
+                e.preventDefault();
+                window.location.href = "<?php echo Mage::getUrl('mastercard/review/placeOrder') ?>";
+            });
+            $('edit-shipping-button').on('click', function (e) {
+                e.preventDefault();
+                $('shipping-address-form').show();
+                $('shipping-address-display').hide();
+            });
+            $('shipping-address-form-cancel').on('click', function (e) {
+                e.preventDefault();
+                $('shipping-address-form').hide();
+                $('shipping-address-display').show();
+            });
+            $('shipping-address-form-save').on('click', function (e) {
+                e.preventDefault();
+                new Ajax.Request('<?php echo Mage::getUrl('mastercard/session/setShippingInformation') ?>', {
+                    method: 'post',
+                    parameters: $H($(shipping.form).serialize(true)),
+                    onSuccess: this.didSaveShipping.bind(this),
+                    onFailure: this.didFail.bind(this),
+                    onLoading: function () {
+                        console.log('loading');
+                    }
+                });
+            }.bind(this));
+            $('update_shipping_method_submit').on('click', function (e) {
+                e.preventDefault();
+                new Ajax.Request('<?php echo Mage::getUrl('mastercard/session/setShippingInformation') ?>', {
+                    method: 'post',
+                    parameters: $H({
+                        shipping_method: $('shipping_method').value
+                    }),
+                    onSuccess: this.didSaveShipping.bind(this),
+                    onFailure: this.didFail.bind(this),
+                    onLoading: function () {
+                        console.log('loading');
+                    }
+                });
+            }.bind(this));
+        },
+
+        didSaveShipping: function () {
+            window.location.reload();
+        },
+
+        didFail: function () {
+            alert('<?php echo $this->__('Failed saving the shipping address/method, please try again.') ?>');
+        }
+    };
+    new MpgsOrderReview();
+</script>

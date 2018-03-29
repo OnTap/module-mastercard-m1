@@ -150,6 +150,9 @@ class Mastercard_Mpgs_Block_Review extends Mage_Core_Block_Template
      */
     protected function _beforeToHtml()
     {
+        $this->getChild('shipping')
+            ->setQuote($this->_quote);
+
         $methodInstance = $this->_quote->getPayment()->getMethodInstance();
         $this->setPaymentMethodTitle($methodInstance->getTitle());
 

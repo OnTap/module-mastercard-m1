@@ -23,6 +23,7 @@
         </reference>
         <reference name="content">
             <block type="mpgs/review" name="checkout.review" template="Mastercard/review.phtml">
+                <block type="mpgs/review_shipping" name="checkout.review.shipping" as="shipping" template="Mastercard/review/shipping.phtml" />
                 <block type="checkout/cart_totals" name="checkout.review.details" as="details" template="Mastercard/review/details.phtml">
                     <action method="addItemRender"><type>default</type><block>checkout/cart_item_renderer</block><template>checkout/onepage/review/item.phtml</template></action>
                     <action method="addItemRender"><type>grouped</type><block>checkout/cart_item_renderer_grouped</block><template>checkout/onepage/review/item.phtml</template></action>
@@ -31,5 +32,6 @@
                 </block>
             </block>
         </reference>
+        <remove name="footer" />
     </mastercard_review_index>
 </layout>

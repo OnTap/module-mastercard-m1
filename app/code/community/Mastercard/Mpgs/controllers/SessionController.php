@@ -69,17 +69,23 @@ class Mastercard_Mpgs_SessionController extends Mastercard_Mpgs_Controller_JsonR
      */
     public function setPaymentInformationAction()
     {
+        if (!$this->getRequest()->isPost()) {
+            $this->norouteAction();
+            return;
+        }
+
         $data = array();
 
         try {
             $session = array(
-                'id' => $this->getRequest()->getParam('id'),
-                'updateStatus' => $this->getRequest()->getParam('updateStatus'),
-                'version' => $this->getRequest()->getParam('version')
+                'id' => $this->getRequest()->getPost('id'),
+                'updateStatus' => $this->getRequest()->getPost('updateStatus'),
+                'version' => $this->getRequest()->getPost('version')
             );
 
             $payment = $this->getQuote()->getPayment();
             $payment->setAdditionalInformation('session', $session);
+            $payment->setAdditionalInformation('addresses_exported', 0);
             $payment->setMethod(Mastercard_Mpgs_Model_Method_Amex::METHOD_NAME);
 
             $this->getQuote()->save();
@@ -92,6 +98,41 @@ class Mastercard_Mpgs_SessionController extends Mastercard_Mpgs_Controller_JsonR
         }
 
         $this->_prepareDataJSON($data);
+    }
+
+    /**
+     * @throws Zend_Controller_Response_Exception
+     */
+    public function setShippingInformationAction()
+    {
+        if (!$this->getRequest()->isPost()) {
+            $this->norouteAction();
+            return;
+        }
+
+        $result = array();
+
+        /** @var Mage_Core_Model_Session $session */
+        $session = Mage::getSingleton('core/session');
+
+        $method = $this->getRequest()->getPost('shipping_method', '');
+        if ($method) {
+            $result = $this->getOnepage()->saveShippingMethod($method);
+            $this->getOnepage()->getQuote()->collectTotals()->save();
+            $session->addSuccess($this->__('Shipping method updated.'));
+        }
+
+        $data = $this->getRequest()->getPost('shipping', array());
+        if (!empty($data)) {
+            $result = $this->getOnepage()->saveShipping($data, null);
+            $session->addSuccess($this->__('Shipping address updated.'));
+        }
+
+        if (isset($result['error'])) {
+            $this->getResponse()->setHttpResponseCode(400);
+        }
+
+        $this->_prepareDataJSON($result);
     }
 
     /**

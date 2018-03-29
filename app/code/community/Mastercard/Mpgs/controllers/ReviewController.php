@@ -20,8 +20,8 @@ class Mastercard_Mpgs_ReviewController extends Mage_Core_Controller_Front_Action
             $this->_redirect('checkout/onepage/success');
 
         } catch (Exception $e) {
-            Mage::getSingleton('checkout/session')->addError($e->getMessage());
-            $this->_redirect('checkout/cart');
+            Mage::getSingleton('core/session')->addError($e->getMessage());
+            $this->_redirect('mastercard/review/index');
         }
     }
 
@@ -30,33 +30,38 @@ class Mastercard_Mpgs_ReviewController extends Mage_Core_Controller_Front_Action
      */
     public function indexAction()
     {
-//        try {
+        try {
             $quote = $this->getQuote();
             $payment = $quote->getPayment();
 
+            $addressesExported = (bool) $payment->getAdditionalInformation('addresses_exported');
+
             /** @var Mastercard_Mpgs_Model_Method_WalletInterface $method */
             $method = $payment->getMethodInstance();
-            if ($method instanceof Mastercard_Mpgs_Model_Method_WalletInterface) {
+            if ($method instanceof Mastercard_Mpgs_Model_Method_WalletInterface && !$addressesExported) {
                 $method->getAddressDataFromSession($payment);
-            }
+                $payment->setAdditionalInformation('addresses_exported', 1);
 
-            $quote->getShippingAddress()
-                ->setCollectShippingRates(true)
-                ->collectShippingRates()
-                ->save();
+                $quote->getShippingAddress()
+                    ->setCollectShippingRates(true)
+                    ->collectShippingRates()
+                    ->save();
 
-            $shippingMethod = null;
-            foreach ($quote->getShippingAddress()->getGroupedAllShippingRates() as $group) {
-                foreach ($group as $rate) {
-                    $shippingMethod = $rate->getCode();
-                    break;
+                $shippingMethod = null;
+                foreach ($quote->getShippingAddress()->getGroupedAllShippingRates() as $group) {
+                    foreach ($group as $rate) {
+                        $shippingMethod = $rate->getCode();
+                        break;
+                    }
                 }
+
+                $quote->getShippingAddress()
+                    ->setShippingMethod($shippingMethod);
             }
 
-            $quote->getShippingAddress()
-                ->setShippingMethod($shippingMethod)
+            $quote
+                ->getShippingAddress()
                 ->setCollectShippingRates(true);
-
             $quote
                 ->collectTotals()
                 ->save();
@@ -72,16 +77,16 @@ class Mastercard_Mpgs_ReviewController extends Mage_Core_Controller_Front_Action
 
             return;
 
-//        } catch (Mage_Core_Exception $e) {
-//            Mage::getSingleton('checkout/session')->addError($e->getMessage());
-//        }  catch (Exception $e) {
-//            Mage::getSingleton('checkout/session')->addError(
-//                $this->__('Unable to initialize summary page.')
-//            );
-//            Mage::logException($e);
-//        }
-//
-//        $this->_redirect('checkout/cart');
+        } catch (Mage_Core_Exception $e) {
+            Mage::getSingleton('checkout/session')->addError($e->getMessage());
+        }  catch (Exception $e) {
+            Mage::getSingleton('checkout/session')->addError(
+                $this->__('Unable to initialize order review page.')
+            );
+            Mage::logException($e);
+        }
+
+        $this->_redirect('checkout/cart');
     }
 
     /**
