@@ -4,6 +4,7 @@
     var AmexCheckout = Class.create();
     AmexCheckout.prototype = {
         config: {},
+        aecFinished: false,
 
         initialize: function (config) {
             this.config = config;
@@ -41,7 +42,9 @@
         didOpenWallet: function (session, response) {
             var config = response.responseJSON;
 
-            window.aecCallbackHandler = this.aecCallbackHandler.bind(this, session);
+            if (window.aecCallbackHandler === undefined) {
+                window.aecCallbackHandler = this.aecCallbackHandler.bind(this, session);
+            }
 
             // Cleanup any previous tags
             $A(document.getElementsByTagName('amex:init')).each(function (item) {
@@ -70,6 +73,8 @@
         },
 
         didFail: function (transport) {
+            this.aecFinished = false;
+
             if (transport.responseJSON.exception) {
                 console.error('Backend exception: %s', transport.responseJSON.exception);
             }
@@ -82,6 +87,12 @@
         },
 
         aecCallbackHandler: function (session, aecData) {
+            if (this.aecFinished) {
+                return;
+            }
+
+            this.aecFinished = true;
+
             new Ajax.Request(this.config.save_payment_url, {
                 method: 'post',
                 parameters: $H(session),

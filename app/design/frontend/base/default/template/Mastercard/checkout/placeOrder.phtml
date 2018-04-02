@@ -1,8 +1,11 @@
-<div class="buttons-set">
+<div class="buttons-set wallet-checkout">
+    <?php echo $this->getChildHtml('agreements') ?>
     <p class="f-left">
         <?php echo $this->__('Forgot an Item?') ?> <a href="<?php echo $this->getUrl('checkout/cart') ?>"><?php echo $this->__('Edit Your Cart') ?></a>
     </p>
-    <?php echo $this->getChildHtml('button') ?>
+    <div id="agreements-protector">
+        <?php echo $this->getChildHtml('button') ?>
+    </div>
     <span class="please-wait" id="mpgs-loading" style="display:none;">
         <img src="<?php echo $this->getSkinUrl('images/opc-ajax-loader.gif') ?>" alt="<?php echo Mage::helper('core')->quoteEscape($this->__('Loading...')) ?>" title="<?php echo Mage::helper('core')->quoteEscape($this->__('Loading...')) ?>" class="v-middle" /> <?php echo $this->__('Loading...') ?>
     </span>
@@ -12,4 +15,20 @@
 </div>
 <script type="text/javascript">
     $('checkout-review-submit').hide();
+    $('agreements-protector').addEventListener('click', function (e) {
+        var agreementsFilled = true;
+        $A(document.querySelectorAll('.wallet-checkout #checkout-agreements input')).each(function (item) {
+            if (agreementsFilled && !item.checked) {
+                agreementsFilled = false;
+            }
+        });
+        if (agreementsFilled) {
+            return;
+        }
+        if (e.target.parentElement.parentElement.id === 'amex-express-checkout') {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            alert("<?php echo $this->__('Please agree to all the terms and conditions before placing the order.') ?>");
+        }
+    }, true);
 </script>

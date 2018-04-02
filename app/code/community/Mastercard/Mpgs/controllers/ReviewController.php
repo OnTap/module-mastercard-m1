@@ -11,6 +11,15 @@ class Mastercard_Mpgs_ReviewController extends Mage_Core_Controller_Front_Action
     public function placeOrderAction()
     {
         try {
+            $requiredAgreements = Mage::helper('checkout')->getRequiredAgreementIds();
+            if ($requiredAgreements) {
+                $postedAgreements = array_keys($this->getRequest()->getPost('agreement', array()));
+                $diff = array_diff($requiredAgreements, $postedAgreements);
+                if ($diff) {
+                    throw new Exception($this->__('Please agree to all the terms and conditions before placing the order.'));
+                }
+            }
+
             $quote = $this->getOnepage()->getQuote();
             $quote->collectTotals();
 

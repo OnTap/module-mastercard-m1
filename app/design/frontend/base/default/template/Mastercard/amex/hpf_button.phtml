@@ -4,6 +4,7 @@
     var AmexCheckout = Class.create();
     AmexCheckout.prototype = {
         config: {},
+        aecFinished: false,
 
         initialize: function (config) {
             this.config = config;
@@ -18,21 +19,24 @@
         loadAdapter: function () {
             $('mpgs-loading').show();
 
-            var cacheBust = new Date().getTime(),
-                url = this.config.component_url;
+            if ($('aec-script') === null) {
+                var cacheBust = new Date().getTime(),
+                    url = this.config.component_url;
 
-            if (this.config.debug === '1') {
-                url += '?debug=1&_=' + cacheBust;
-            } else {
-                url += '?_=' + cacheBust;
+                if (this.config.debug === '1') {
+                    url += '?debug=1&_=' + cacheBust;
+                } else {
+                    url += '?_=' + cacheBust;
+                }
+
+                var loader = new Element('script', {
+                    id: 'aec-script',
+                    type: 'text/javascript',
+                    async: true,
+                    src: url
+                });
+                document.body.insert(loader);
             }
-
-            var loader = new Element('script', {
-                type: 'text/javascript',
-                async: true,
-                src: url
-            });
-            document.body.insert(loader);
 
             this.waitUntilReady(function () {
                 this.debug('session.js loaded, configuring...');
@@ -69,11 +73,16 @@
         },
 
         aecInteractionFinished: function (response) {
+            if (this.aecFinished) {
+                return;
+            }
+
             this.debug('AEC interaction completed', response);
 
             if (response.status !== 'ok' || !response.session) {
                 alert('Unexpected AEC status, please try again later.');
             } else {
+                this.aecFinished = true;
                 $('amex-express-checkout').hide();
                 $('mpgs-please-wait').show();
                 new Ajax.Request(this.config.save_payment_url, {

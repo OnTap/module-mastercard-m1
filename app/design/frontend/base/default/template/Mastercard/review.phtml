@@ -76,17 +76,27 @@
     </div>
 </div>
 
+<?php echo $this->getChildHtml('agreements') ?>
+
 <div class="buttons-set">
-    <button type="button" id="place-order-button" class="button" title="<?php echo Mage::helper('core')->quoteEscape($this->__('Place Order')) ?>"><span><span><?php echo $this->__('Place Order') ?></span></span></button>
+    <form id="place-order-form" action="<?php echo Mage::getUrl('mastercard/review/placeOrder') ?>" method="post">
+        <button type="submit" id="place-order-button" class="button" title="<?php echo Mage::helper('core')->quoteEscape($this->__('Place Order')) ?>"><span><span><?php echo $this->__('Place Order') ?></span></span></button>
+    </form>
 </div>
 
 <script type="text/javascript">
     var MpgsOrderReview = Class.create();
     MpgsOrderReview.prototype = {
         initialize: function () {
-            $('place-order-button').on('click', function (e) {
+            $('place-order-form').on('submit', function (e) {
                 e.preventDefault();
-                window.location.href = "<?php echo Mage::getUrl('mastercard/review/placeOrder') ?>";
+                var agreements = $('checkout-agreements');
+                if (agreements) {
+                    $A(agreements.querySelectorAll('input')).each(function (item) {
+                        this.insert(item.clone().hide());
+                    }.bind(this));
+                }
+                this.submit();
             });
             $('edit-shipping-button').on('click', function (e) {
                 e.preventDefault();
