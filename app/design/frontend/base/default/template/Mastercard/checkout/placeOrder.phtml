@@ -25,7 +25,8 @@
         if (agreementsFilled) {
             return;
         }
-        if (e.target.parentElement.parentElement.id === 'amex-express-checkout') {
+
+        if (e.target.parentElement.parentElement.id === 'amex-express-checkout' || e.target.id === 'mastercard_hostedcheckout_placeorder' || e.target.parentElement.id === 'mastercard_hostedcheckout_placeorder') {
             e.stopImmediatePropagation();
             e.stopPropagation();
             alert("<?php echo $this->__('Please agree to all the terms and conditions before placing the order.') ?>");
