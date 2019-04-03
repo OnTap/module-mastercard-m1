@@ -1,11 +1,10 @@
 <?php
 /**
- * Copyright (c) 2018. On Tap Networks Limited.
+ * Copyright (c) On Tap Networks Limited.
  */
 class Mastercard_Mpgs_Model_RestFactory
 {
     protected $methodConfigMapper = array(
-        'Mastercard_amex' => 'mpgs/config_amex',
         'Mastercard_hosted' => 'mpgs/config_hosted',
     );
 

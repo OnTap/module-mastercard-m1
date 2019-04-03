@@ -1,30 +1,52 @@
-<?php /** @var Mastercard_Mpgs_Block_Checkout_Button_Hosted $this */ ?>
-<button type="submit"
-        title="<?php echo Mage::helper('core')->quoteEscape($this->__('Place Order')) ?>"
-        class="button btn-checkout"
-        id="mastercard_hostedcheckout_placeorder">
-    <span><?php echo $this->__('Place Order') ?></span>
-</button>
+<div>
+    <span class="please-wait" id="mpgs-loading" style="display:none;">
+        <img src="<?php echo $this->getSkinUrl('images/opc-ajax-loader.gif') ?>" alt="<?php echo Mage::helper('core')->quoteEscape($this->__('Loading...')) ?>" title="<?php echo Mage::helper('core')->quoteEscape($this->__('Loading...')) ?>" class="v-middle" /> <?php echo $this->__('Loading...') ?>
+    </span>
+    <span class="please-wait" id="mpgs-please-wait" style="display:none;">
+        <img src="<?php echo $this->getSkinUrl('images/opc-ajax-loader.gif') ?>" alt="<?php echo Mage::helper('core')->quoteEscape($this->__('Submitting order information...')) ?>" title="<?php echo Mage::helper('core')->quoteEscape($this->__('Submitting order information...')) ?>" class="v-middle" /> <?php echo $this->__('Submitting order information...') ?>
+    </span>
+</div>
 <script type="text/javascript">
+    var url_save_billing = '<?php echo $this->getUrl('onestepcheckout/ajax/save_billing', array('_secure'=>true)); ?>';
+    var url_set_methods = '<?php echo $this->getUrl('onestepcheckout/ajax/set_methods_separate', array('_secure'=>true)); ?>';
+
     var HostedCheckout = Class.create();
     HostedCheckout.prototype = {
         config: {},
         button: null,
+        originalSubmit: null,
 
         initialize: function (config) {
             this.config = config;
-            this.button = $('mastercard_hostedcheckout_placeorder');
-            if (window.payment.currentMethod === 'Mastercard_hosted') {
+            this.button = $('onestepcheckout-place-order');
+            this.form = $('onestepcheckout-form');
+
+            this.loadAdapter();
+
+            $$('#checkout-payment-method-load dt input').invoke('observe', 'click', function(e) {
                 this.loadAdapter();
-            }
+            }.bind(this));
         },
 
         loadAdapter: function () {
-            this.button.stopObserving('click');
-            this.button.on('click', this.openHostedSession.bind(this));
+            if (window.payment.currentMethod !== 'Mastercard_hosted') {
+                if (this.originalSubmit) {
+                    this.form.submit = this.originalSubmit;
+                }
+                return;
+            } else {
+                this.originalSubmit = this.form.submit;
+                this.form.submit = this.placeOrderSubmit.bind(this);
+            }
 
+            if (typeof window.Checkout.configure !== 'undefined') {
+                return;
+            }
+
+            get_save_billing_function(url_save_billing, url_set_methods, undefined, true)();
+
+            this.button.disable();
             $('mpgs-loading').show();
-            this.button.hide();
 
             window.onMpgsError = this.onMpgsError.bind(this);
             window.onMpgsCancel = this.onMpgsCancel.bind(this);
@@ -42,17 +64,17 @@
 
             this.waitUntilReady(function () {
                 $('mpgs-loading').hide();
-                this.button.show();
+                this.button.enable();
             }.bind(this));
         },
 
-        noCache: function() {
-            return '?_=' + Math.round(new Date().getTime() / 1000);
+        placeOrderSubmit: function () {
+            this.openHostedSession();
         },
 
         waitUntilReady: function (callback) {
             setTimeout(function() {
-                if (typeof window.Checkout !== 'undefined') {
+                if (typeof window.Checkout.configure !== 'undefined') {
                     callback();
                 } else {
                     this.waitUntilReady(callback);
@@ -60,9 +82,12 @@
             }.bind(this), 200);
         },
 
+        noCache: function() {
+            return '?_=' + Math.round(new Date().getTime() / 1000);
+        },
+
         openHostedSession: function () {
             $('mpgs-loading').show();
-            this.button.hide();
 
             new Ajax.Request(this.config.create_session_url + this.noCache(), {
                 requestHeaders: {
@@ -99,13 +124,11 @@
             } else {
                 alert(""+response.statusText+", please contact the merchant.");
             }
-            this.button.show();
             window.location.href = this.config.cancel_url;
         },
 
         onMpgsError: function (error) {
             $('mpgs-loading').hide();
-            this.button.show();
             alert(error.cause + ' - ' + error.explanation);
             window.location.href = this.config.cancel_url;
         },
@@ -125,9 +148,8 @@
                 value: resultIndicator
             });
 
-            $('co-payment-form').appendChild(input);
-
-            review.save();
+            this.form.appendChild(input);
+            this.originalSubmit.apply(this.form);
         }
     };
     new HostedCheckout(<?php echo $this->getJsConfig() ?>);

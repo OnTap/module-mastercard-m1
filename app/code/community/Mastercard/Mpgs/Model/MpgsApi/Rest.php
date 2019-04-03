@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2018. On Tap Networks Limited.
+ * Copyright (c) On Tap Networks Limited.
  */
 class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 {
@@ -30,10 +30,11 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 
     /**
      * @param $err
+     * @throws Exception
      */
     protected function _critical($err)
     {
-        // @todo: implement
+        throw new Exception($err);
     }
 
     /**
@@ -172,27 +173,6 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
             )
         );
         return $resData;
-    }
-
-    /**
-     * @param Varien_Object $params
-     * @param Mage_Sales_Model_Quote $quote
-     * @return array
-     * @throws Exception
-     */
-    public function updateSessionFromWallet(Varien_Object $params, Mage_Sales_Model_Quote $quote)
-    {
-        /** @var Mastercard_Mpgs_Helper_MpgsRest $rest */
-        $rest = Mage::helper('mpgs/mpgsRest');
-
-        $data = array();
-        $data['apiOperation'] = 'UPDATE_SESSION_FROM_WALLET';
-        $data['order'] = $rest->buildWalletData($quote, Mastercard_Mpgs_Model_Method_Amex::WALLET_CODE);
-        $data['wallet'] = $rest->aecDataBulder($params);
-
-        $session = $quote->getPayment()->getAdditionalInformation('session');
-
-        return $this->sender(self::MPGS_POST, 'session/' . $session['id'], $data);
     }
 
     /**

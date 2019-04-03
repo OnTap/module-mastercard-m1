@@ -12,14 +12,4 @@ class Mastercard_Mpgs_Block_Cart_Button_AbstractButton extends Mage_Core_Block_T
     {
         return Mage::getSingleton('checkout/type_onepage')->getQuote();
     }
-
-    /**
-     * Return Mpgs config instance.
-     *
-     * @return Mage_Core_Model_Abstract|Mastercard_Mpgs_Model_Config_Amex
-     */
-    public function getConfig()
-    {
-        return Mage::getSingleton('mpgs/config_amex');
-    }
 }

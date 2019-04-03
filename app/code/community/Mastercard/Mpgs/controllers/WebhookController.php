@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2017. On Tap Networks Limited.
+ * Copyright (c) On Tap Networks Limited.
  */
 
 class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Action
@@ -391,13 +391,12 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
 
     /**
      * @param string $type
-     * @return Mastercard_Mpgs_Model_Config_Amex|Mastercard_Mpgs_Model_Config_Hosted
+     * @return Mastercard_Mpgs_Model_Config_Hosted
      * @throws Exception
      */
     protected function configFactory($type)
     {
         $config = array(
-            'amex' => Mage::getSingleton('mpgs/config_amex'),
             'hosted' => Mage::getSingleton('mpgs/config_hosted')
         );
 

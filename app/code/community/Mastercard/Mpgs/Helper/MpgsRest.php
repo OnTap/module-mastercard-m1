@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2017. On Tap Networks Limited.
+ * Copyright (c) On Tap Networks Limited.
  */
 class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
 {
@@ -273,15 +273,14 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         $billingAddress = $quote->getBillingAddress();
         $billingCountry_2 = $billingAddress->getCountryId();
         $billingCountry_3 = Mage::getModel('directory/country')->loadByCode($billingCountry_2)->getIso3_code();
-        $billingStreet = $billingAddress->getStreet();
 
         $billing ['address'] ['city'] = $billingAddress->getCity();
-        $billing ['address'] ['company'] = $billingAddress->getCompany() != '' ? $billingAddress->getCompany() : null;
+        $billing ['address'] ['company'] = $billingAddress->getCompany() ? : null;
         $billing ['address'] ['country'] = $billingCountry_3;
         $billing ['address'] ['postcodeZip'] = $billingAddress->getPostcode();
         $billing ['address'] ['stateProvince'] = $billingAddress->getRegionCode();
-        $billing ['address'] ['street'] = $billingStreet [0];
-        $billing ['address'] ['street2'] = count($billingStreet) > 1 ? $billingStreet [1] : null;
+        $billing ['address'] ['street'] = $billingAddress->getStreet1() ? : null;
+        $billing ['address'] ['street2'] = $billingAddress->getStreet2() ? : null;
 
         return $billing;
     }
@@ -404,22 +403,6 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
             'amount' => sprintf('%.2F', $quote->getGrandTotal()),
             'currency' => $quote->getStore()->getBaseCurrencyCode(),
             'walletProvider' => $type
-        );
-    }
-
-    /**
-     * @param Varien_Object $params
-     * @return array
-     */
-    public function aecDataBulder($params)
-    {
-        return array(
-            'amexExpressCheckout' => array(
-                'authCode' => $params->getData('auth_code'),
-                'transactionId' => $params->getData('transaction_id'),
-                'walletId' => $params->getData('wallet_id'),
-                'selectedCardType' => $params->getData('card_type')
-            )
         );
     }
 

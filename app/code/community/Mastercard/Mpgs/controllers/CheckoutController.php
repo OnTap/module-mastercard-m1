@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2017. On Tap Networks Limited.
+ * Copyright (c) On Tap Networks Limited.
  */
 
 class Mastercard_Mpgs_CheckoutController extends Mastercard_Mpgs_Controller_JsonResponseController

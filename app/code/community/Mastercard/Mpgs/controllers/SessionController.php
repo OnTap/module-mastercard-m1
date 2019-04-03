@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2017. On Tap Networks Limited.
+ * Copyright (c) On Tap Networks Limited.
  */
 
 class Mastercard_Mpgs_SessionController extends Mastercard_Mpgs_Controller_JsonResponseController
@@ -24,72 +24,6 @@ class Mastercard_Mpgs_SessionController extends Mastercard_Mpgs_Controller_JsonR
             /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
             $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
             $data = $restAPI->createSession();
-        } catch (Exception $e) {
-            $this->getResponse()->setHttpResponseCode(400);
-            $data = array(
-                'exception' => $e->getMessage()
-            );
-        }
-
-        $this->_prepareDataJSON($data);
-    }
-
-    /**
-     * @throws Mage_Core_Exception
-     */
-    public function openWalletAction()
-    {
-        $session = array(
-            'session' => array(
-                'id' => $this->getRequest()->getParam('id'),
-                'updateStatus' => $this->getRequest()->getParam('updateStatus'),
-                'version' => $this->getRequest()->getParam('version')
-            )
-        );
-
-        $payment = $this->getQuote()->getPayment();
-        $payment->setAdditionalInformation('session', $session);
-        $payment->setMethod(Mastercard_Mpgs_Model_Method_Amex::METHOD_NAME);
-
-        $returnData = new Varien_Object();
-
-        /** @var Mastercard_Mpgs_Model_Method_WalletInterface $method */
-        $method = $payment->getMethodInstance();
-        if ($method instanceof Mastercard_Mpgs_Model_Method_WalletInterface) {
-            $method->openWallet($payment, $returnData);
-        }
-
-        $this->_prepareDataJSON(
-            $returnData->toArray()
-        );
-    }
-
-    /**
-     * @throws Zend_Controller_Response_Exception
-     */
-    public function setPaymentInformationAction()
-    {
-        if (!$this->getRequest()->isPost()) {
-            $this->norouteAction();
-            return;
-        }
-
-        $data = array();
-
-        try {
-            $session = array(
-                'id' => $this->getRequest()->getPost('id'),
-                'updateStatus' => $this->getRequest()->getPost('updateStatus'),
-                'version' => $this->getRequest()->getPost('version')
-            );
-
-            $payment = $this->getQuote()->getPayment();
-            $payment->setAdditionalInformation('session', $session);
-            $payment->setAdditionalInformation('addresses_exported', 0);
-            $payment->setMethod(Mastercard_Mpgs_Model_Method_Amex::METHOD_NAME);
-
-            $this->getQuote()->save();
-
         } catch (Exception $e) {
             $this->getResponse()->setHttpResponseCode(400);
             $data = array(
