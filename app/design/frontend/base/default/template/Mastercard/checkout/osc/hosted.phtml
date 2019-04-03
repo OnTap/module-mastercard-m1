@@ -20,33 +20,17 @@
             this.config = config;
             this.button = $('onestepcheckout-place-order');
             this.form = $('onestepcheckout-form');
-
-            this.loadAdapter();
-
-            $$('#checkout-payment-method-load dt input').invoke('observe', 'click', function(e) {
-                this.loadAdapter();
-            }.bind(this));
-        },
-
-        loadAdapter: function () {
-            if (window.payment.currentMethod !== 'Mastercard_hosted') {
-                if (this.originalSubmit) {
-                    this.form.submit = this.originalSubmit;
-                }
-                return;
-            } else {
-                this.originalSubmit = this.form.submit;
-                this.form.submit = this.placeOrderSubmit.bind(this);
-            }
-
-            if (typeof window.Checkout.configure !== 'undefined') {
-                return;
-            }
+            this.originalSubmit = this.form.submit;
+            this.form.submit = this.placeOrderSubmit.bind(this);
 
             get_save_billing_function(url_save_billing, url_set_methods, undefined, true)();
+        },
 
-            this.button.disable();
-            $('mpgs-loading').show();
+        loadAdapter: function (callback) {
+            if (typeof window.Checkout.configure !== 'undefined') {
+                callback();
+                return;
+            }
 
             window.onMpgsError = this.onMpgsError.bind(this);
             window.onMpgsCancel = this.onMpgsCancel.bind(this);
@@ -63,13 +47,23 @@
             document.body.insert(loader);
 
             this.waitUntilReady(function () {
-                $('mpgs-loading').hide();
-                this.button.enable();
+                callback();
             }.bind(this));
         },
 
         placeOrderSubmit: function () {
-            this.openHostedSession();
+            if (window.payment.currentMethod !== 'Mastercard_hosted') {
+                this.originalSubmit.apply(this.form);
+                return;
+            }
+
+            this.button.disable();
+            $('mpgs-loading').show();
+
+            this.loadAdapter(function () {
+                $('mpgs-loading').hide();
+                this.openHostedSession();
+            }.bind(this));
         },
 
         waitUntilReady: function (callback) {
