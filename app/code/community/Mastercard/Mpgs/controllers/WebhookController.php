@@ -397,7 +397,8 @@ class Mastercard_Mpgs_WebhookController extends Mage_Core_Controller_Front_Actio
     protected function configFactory($type)
     {
         $config = array(
-            'hosted' => Mage::getSingleton('mpgs/config_hosted')
+            'hosted' => Mage::getSingleton('mpgs/config_hosted'),
+            'form' => Mage::getSingleton('mpgs/config_form'),
         );
 
         if (!isset($config[$type])) {
