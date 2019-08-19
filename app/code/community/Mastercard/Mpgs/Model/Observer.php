@@ -23,7 +23,7 @@ class Mastercard_Mpgs_Model_Observer
      * @param Varien_Event_Observer $observer
      * @return $this
      */
-    public function paymentInfoBlockPrepareSpecificInformation( $observer ) 
+    public function paymentInfoBlockPrepareSpecificInformation($observer)
     {
         if ($observer->getEvent()->getBlock()->getIsSecureMode()) {
             return $this;

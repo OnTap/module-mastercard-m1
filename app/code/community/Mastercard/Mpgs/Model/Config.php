@@ -20,6 +20,40 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
     protected $pathDebug = null;
 
     /**
+     * @return string
+     * @throws Exception
+     */
+    public function getType()
+    {
+        throw new Exception('Mastercard_Mpgs_Model_Config::getType not implemented. Implement in subclasses.');
+    }
+
+    /**
+     * Retrieve MPGS Webhook Notifications URL.
+     * @return string|null
+     * @throws Exception
+     */
+    public function getWebhookNotificationUrl()
+    {
+        $webhookSecret = $this->getWebhookSecret();
+        if (empty($webhookSecret)) {
+            return null;
+        }
+
+        $url = Mage::getStoreConfig($this->pathWebhookUrl);
+        if (!empty($url)) {
+            return $url;
+        }
+
+        return Mage::getUrl(
+            self::WEB_HOOK_UPDATE_URL, array(
+                '_secure' => true,
+                'type' => $this->getType()
+            )
+        );
+    }
+
+    /**
      * Retrieve an array of transaction types.
      *
      * @return array
@@ -109,19 +143,6 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
     {
         $url = $this->getEndPointUrl();
         $url .= 'api/rest/version/' . self::API_VERSION . '/merchant/';
-
-        return $url;
-    }
-
-    /**
-     * Retrieve MPGS JS API url.
-     *
-     * @return string
-     */
-    public function getJsApiUrl() 
-    {
-        $url = $this->getEndPointUrl();
-        $url .= 'checkout/version/' . self::API_VERSION . '/checkout.js';
 
         return $url;
     }

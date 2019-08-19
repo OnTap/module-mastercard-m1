@@ -1,0 +1,177 @@
+<?php $_code = $this->getMethodCode() ?>
+
+<style id="antiClickjack">body{display:none !important;}</style>
+
+<ul class="form-list" id="payment_form_<?php echo $this->getMethodCode() ?>" style="display:none;">
+    <li style="display: none">
+        <input id="<?php echo $_code ?>_session_id" type="hidden" name="payment[mpgs_session_id]" value="" />
+    </li>
+    <li>
+        <label for="<?php echo $_code ?>_cc_number" class="required"><em>*</em><?php echo $this->__('Credit Card Number') ?></label>
+        <div class="input-box">
+            <input type="text" id="<?php echo $_code ?>_cc_number" title="<?php echo Mage::helper('core')->jsQuoteEscape($this->__('Credit Card Number')) ?>" class="input-text" value="" readonly />
+        </div>
+    </li>
+    <li id="<?php echo $_code ?>_cc_type_exp_div">
+        <label for="<?php echo $_code ?>_expiration" class="required"><em>*</em><?php echo $this->__('Expiration Date') ?></label>
+        <div class="input-box">
+            <div class="v-fix">
+                <select id="<?php echo $_code ?>_expiration" class="month">
+                    <?php $_ccExpMonth = $this->getInfoData('cc_exp_month') ?>
+                    <?php foreach ($this->getCcMonths() as $k=>$v): ?>
+                        <option value="<?php echo $k?$k:'' ?>"><?php echo $v ?></option>
+                    <?php endforeach ?>
+                </select>
+            </div>
+            <div class="v-fix">
+                <?php $_ccExpYear = $this->getInfoData('cc_exp_year') ?>
+                <select id="<?php echo $_code ?>_expiration_yr" class="year">
+                    <?php foreach ($this->getCcYears() as $k=>$v): ?>
+                        <option value="<?php echo $k?$k:'' ?>"><?php echo $v ?></option>
+                    <?php endforeach ?>
+                </select>
+            </div>
+        </div>
+    </li>
+    <li id="<?php echo $_code ?>_cc_type_cvv_div">
+        <label for="<?php echo $_code ?>_cc_cid" class="required"><em>*</em><?php echo $this->__('Card Verification Number') ?></label>
+        <div class="input-box">
+            <div class="v-fix">
+                <input type="text" title="<?php echo Mage::helper('core')->jsQuoteEscape($this->__('Card Verification Number')) ?>" class="input-text cvv" id="<?php echo $_code ?>_cc_cid" value="" readonly />
+            </div>
+            <a href="#" class="cvv-what-is-this"><?php echo $this->__('What is this?') ?></a>
+        </div>
+    </li>
+</ul>
+
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+
+    var MasterCardForm = Class.create();
+
+    MasterCardForm.prototype = {
+        config: {},
+        button: null,
+        loader: null,
+        adapterLoaded: false,
+
+        initialize: function (config) {
+            this.button = $$('#payment-buttons-container > button')[0];
+            this.loader = $('payment-please-wait');
+            this.config = config;
+
+            $('payment_form_<?php echo $_code ?>').observe('payment-method:switched', this.loadAdapter.bind(this));
+        },
+
+        loadAdapter: function () {
+            if (this.adapterLoaded) {
+                return;
+            }
+
+            this.button.disable();
+            this.loader.show();
+
+            var loader = new Element('script', {
+                type: 'text/javascript',
+                async: true,
+                src: this.config.component_url
+            });
+
+            document.body.insert(loader);
+
+            this.waitUntilReady(
+                this.configure.bind(this)
+            );
+        },
+
+        waitUntilReady: function (callback) {
+            setTimeout(function() {
+                if (typeof window.PaymentSession !== 'undefined') {
+                    callback();
+                } else {
+                    this.waitUntilReady(callback);
+                }
+            }.bind(this), 200);
+        },
+
+        configure: function () {
+            if ('payment' in window) {
+                var originalPaymentSave = payment.save.bind(payment);
+                Object.extend(payment, {
+                    save: function () {
+                        if (payment.currentMethod !== '<?php echo $_code ?>') {
+                            return originalPaymentSave();
+                        }
+                        PaymentSession.updateSessionFromForm('card');
+                    },
+                    saveSuper: function () {
+                        return originalPaymentSave();
+                    }
+                });
+            } else {
+                throw new Error('Payment object not found, is opcheckout.js loaded?');
+            }
+
+            PaymentSession.configure({
+                fields: {
+                    card: {
+                        number: "#<?php echo $_code ?>_cc_number",
+                        securityCode: "#<?php echo $_code ?>_cc_cid",
+                        expiryMonth: "#<?php echo $_code ?>_expiration",
+                        expiryYear: "#<?php echo $_code ?>_expiration_yr"
+                    }
+                },
+                frameEmbeddingMitigation: ["javascript"],
+                callbacks: {
+                    formSessionUpdate: function(response) {
+                        // HANDLE RESPONSE FOR UPDATE SESSION
+                        if (response.status) {
+                            if ("ok" == response.status) {
+                                $('<?php echo $_code ?>_session_id').value = response.session.id;
+                                this.payment.saveSuper();
+                            } else if ("fields_in_error" == response.status)  {
+
+                                console.log("Session update failed with field errors.");
+                                if (response.errors.cardNumber) {
+                                    console.log("Card number invalid or missing.");
+                                }
+                                if (response.errors.expiryYear) {
+                                    console.log("Expiry year invalid or missing.");
+                                }
+                                if (response.errors.expiryMonth) {
+                                    console.log("Expiry month invalid or missing.");
+                                }
+                                if (response.errors.securityCode) {
+                                    console.log("Security code invalid.");
+                                }
+                            } else if ("request_timeout" == response.status)  {
+                                console.log("Session update failed with request timeout: " + response.errors.message);
+                            } else if ("system_error" == response.status)  {
+                                console.log("Session update failed with system error: " + response.errors.message);
+                            }
+                        } else {
+                            console.log("Session update failed: " + response);
+                        }
+                    },
+                    interaction: {
+                        displayControl: {
+                            formatCard: "EMBOSSED",
+                            invalidFieldCharacters: "REJECT"
+                        }
+                    }
+                }
+            });
+
+            this.loader.hide();
+            this.button.enable();
+            this.adapterLoaded = true;
+        }
+    };
+
+    new MasterCardForm(<?php echo $this->getJsConfig() ?>);
+</script>

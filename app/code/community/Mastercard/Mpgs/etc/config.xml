@@ -6,7 +6,7 @@
 <config>
     <modules>
         <Mastercard_Mpgs>
-            <version>1.1.0</version>
+            <version>1.2.0.0</version>
         </Mastercard_Mpgs>
     </modules>
     <global>
@@ -26,11 +26,12 @@
             </mpgs>
         </helpers>
         <resources>
-            <Mastercard_mpgs_setup>
+            <mpgs_setup>
                 <setup>
                     <module>Mastercard_Mpgs</module>
+                    <class>Mage_Sales_Model_Resource_Setup</class>
                 </setup>
-            </Mastercard_mpgs_setup>
+            </mpgs_setup>
         </resources>
         <events>
             <sales_order_payment_save_before>
@@ -140,7 +141,7 @@
                 <model>mpgs/method_hosted</model>
                 <active>0</active>
                 <payment_action>authorize</payment_action>
-                <title>Credit Card</title>
+                <title>Credit Card (Hosted)</title>
                 <api_username/>
                 <api_password/>
                 <end_point_url>https://eu-gateway.mastercard.com/</end_point_url>
@@ -152,6 +153,22 @@
                 <currency>USD</currency>
                 <allowspecific>0</allowspecific>
             </Mastercard_hosted>
+            <Mastercard_form>
+                <model>mpgs/method_form</model>
+                <active>0</active>
+                <payment_action>authorize</payment_action>
+                <title>Credit Card (Form)</title>
+                <api_username/>
+                <api_password/>
+                <end_point_url>https://eu-gateway.mastercard.com/</end_point_url>
+                <webhook_secret/>
+                <webhook_url/>
+                <debug>0</debug>
+                <test>0</test>
+                <order_status>processing</order_status>
+                <currency>USD</currency>
+                <allowspecific>0</allowspecific>
+            </Mastercard_form>
         </payment>
     </default>
 </config>

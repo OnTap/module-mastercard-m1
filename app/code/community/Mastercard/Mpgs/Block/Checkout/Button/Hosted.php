@@ -33,7 +33,7 @@ class Mastercard_Mpgs_Block_Checkout_Button_Hosted extends Mastercard_Mpgs_Block
         $config = Mage::getSingleton('mpgs/config_hosted');
         return json_encode(
             array(
-                'component_url' => $config->getJsApiUrl(),
+                'component_url' => $config->getJsComponentUrl(),
                 'store_name' => $this->jsQuoteEscape($this->getStoreName(), '"'),
                 'cart_id' => $this->getQuote()->getId(),
                 'create_session_url' => Mage::getUrl('mastercard/checkout/createSession', array('_secure' => true)),

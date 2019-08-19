@@ -5,6 +5,8 @@
 class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_Abstract
 {
     const METHOD_NAME = 'Mastercard_hosted';
+    const METHOD_CODE = 'hosted';
+
     protected $_code = self::METHOD_NAME;
     protected $_infoBlockType = 'payment/info';
 

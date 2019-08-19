@@ -2,6 +2,7 @@
 /**
  * Copyright (c) 2017. On Tap Networks Limited.
  */
+
 class Mastercard_Mpgs_Model_Config_Hosted extends Mastercard_Mpgs_Model_Config
 {
     protected $pathCurrency = 'payment/Mastercard_hosted/currency';
@@ -15,26 +16,21 @@ class Mastercard_Mpgs_Model_Config_Hosted extends Mastercard_Mpgs_Model_Config
     protected $pathWebhookSecret = 'payment/Mastercard_hosted/webhook_secret';
 
     /**
-     * Retrieve MPGS Webhook Notifications URL.
-     * @return string|null
+     * @return string
      */
-    public function getWebhookNotificationUrl()
+    public function getType()
     {
-        $webhookSecret = $this->getWebhookSecret();
-        if (empty($webhookSecret)) {
-            return null;
-        }
+        return Mastercard_Mpgs_Model_Method_Hosted::METHOD_CODE;
+    }
 
-        $url = Mage::getStoreConfig($this->pathWebhookUrl);
-        if (!empty($url)) {
-            return $url;
-        }
+    /**
+     * @return string
+     */
+    public function getJsComponentUrl()
+    {
+        $url = $this->getEndPointUrl();
+        $url .= 'checkout/version/' . self::API_VERSION . '/checkout.js';
 
-        return Mage::getUrl(
-            self::WEB_HOOK_UPDATE_URL, array(
-                '_secure' => true,
-                'type' => 'hosted'
-            )
-        );
+        return $url;
     }
 }
