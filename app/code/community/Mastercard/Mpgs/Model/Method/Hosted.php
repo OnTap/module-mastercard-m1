@@ -100,7 +100,7 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
             return $this;
         }
 
-        /** @var Mastercard_Mpgs_Model_Method_WalletInterface|Mastercard_Mpgs_Model_Method_Abstract $method */
+        /** @var Mastercard_Mpgs_Model_Method_Abstract $method */
         $method = $payment->getMethodInstance();
         $info = $method->getInfoInstance();
 

@@ -122,17 +122,21 @@ abstract class Mastercard_Mpgs_Model_Method_Abstract extends Mage_Payment_Model_
     public function cancel( Varien_Object $payment ) 
     {
         parent::cancel($payment);
+
+        /** @var Mage_Sales_Model_Order_Payment_Transaction $transactionAuth */
+        $transactionAuth = $payment->getAuthorizationTransaction();
+        if (!$transactionAuth) {
+            Mage::throwException('There are not authorization transactions to void.');
+        }
+
         $helper = Mage::helper('mpgs/mpgsRest');
 
         $voidInfo = $payment->getAdditionalInformation('webhook_info');
         if (empty($voidInfo)) {
             $mpgs_id = $payment->getAdditionalInformation('mpgs_id');
-            $txnid = 1;
             $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
-            $voidInfo = $restAPI->void_order($mpgs_id, $txnid);
+            $voidInfo = $restAPI->void_order($mpgs_id, $transactionAuth->getTxnId());
         }
-
-        $transactionAuth = $payment->getAuthorizationTransaction();
 
         $helper->updateTransferInfo($payment, $voidInfo);
         $helper->addVoidTxnPayment($payment, $voidInfo, $transactionAuth->getTxnId());

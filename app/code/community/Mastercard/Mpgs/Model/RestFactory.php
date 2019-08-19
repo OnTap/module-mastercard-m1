@@ -6,6 +6,7 @@ class Mastercard_Mpgs_Model_RestFactory
 {
     protected $methodConfigMapper = array(
         'Mastercard_hosted' => 'mpgs/config_hosted',
+        'Mastercard_form' => 'mpgs/config_form',
     );
 
     /**

@@ -82,10 +82,10 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $logger = Mage::getSingleton('mpgs/logger', array('config' => $this->config));
         $logger->logDebug(
             array(
-            'url' => $url,
-            'type' => $type,
-            'payload' => $payload,
-            'response' => $response
+                'url' => $url,
+                'type' => $type,
+                'payload' => $payload,
+                'response' => $response
             )
         );
 
@@ -255,6 +255,26 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data ['apiOperation'] = 'RETRIEVE_TRANSACTION';
         $resData = $this->sender(self::MPGS_GET, 'order/' . $mpgs_id . '/transaction/' . $txn_id, $data);
         return $resData;
+    }
+
+    /**
+     * Request to obtain the request fields contained in the session
+     *
+     * @param string $sessionId
+     * @return array
+     * @throws Exception
+     */
+    public function get_session($sessionId)
+    {
+        $response = $this->sender(
+            self::MPGS_GET,
+            sprintf(
+                'session/%s',
+                $sessionId
+            )
+        );
+
+        return $response;
     }
 
     /**
