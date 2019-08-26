@@ -39,15 +39,17 @@ class Mastercard_Mpgs_Model_Observer
 
         $helper = Mage::helper('mpgs/mpgsRest');
         $info = array (
-                'response_gatewayCode',
-                'txn_result',
-                'auth_code',
-                'card_number',
-                'card_expiry_date',
-                'fundingMethod',
-                'issuer',
-                'nameOnCard',
-                'cvv_validation'
+            'response_gatewayCode',
+            'txn_result',
+            'auth_code',
+            'card_number',
+            'card_expiry_date',
+            'fundingMethod',
+            'issuer',
+            'nameOnCard',
+            'cvv_validation',
+            '3dsecure_authenticationStatus',
+            '3dsecure_enrollmentStatus',
         );
 
         foreach ($info as $key) {

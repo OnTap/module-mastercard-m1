@@ -102,6 +102,76 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
     }
 
     /**
+     * Request to check a cardholder's enrollment in the 3DSecure scheme.
+     *
+     * @param string $sessionId
+     * @param Mage_Sales_Model_Quote $quote
+     * @param string $responseUrl
+     * @return array
+     * @throws Exception
+     * @throws Mastercard_Mpgs_Model_MpgsApi_Validator_NotEnrolledException
+     */
+    public function check_3ds_enrolment($sessionId, $quote, $responseUrl)
+    {
+        $threeDSecureId = uniqid(sprintf('3DS-'));
+
+        /** @var Mastercard_Mpgs_Helper_MpgsRest $rest */
+        $rest = Mage::helper('mpgs/mpgsRest');
+
+        $data = array(
+            'apiOperation' => 'CHECK_3DS_ENROLLMENT',
+            'order' => $rest->buildOrderAmountFromQuote($quote),
+            '3DSecure' => array(
+                'authenticationRedirect' => array(
+                    'pageGenerationMode' => 'SIMPLE',
+                    'responseUrl' => $responseUrl,
+                )
+            ),
+            'session' => array(
+                'id' => $sessionId
+            )
+        );
+
+        $response = $this->sender(self::MPGS_PUT, '3DSecureId/' . $threeDSecureId, $data);
+
+        /** @var Mastercard_Mpgs_Model_MpgsApi_Validator_Enrollment $validator */
+        $validator = Mage::getModel('mpgs/mpgsApi_validator_enrollment');
+        $validator->validate($response);
+
+        return $response;
+    }
+
+    /**
+     * Interprets the authentication response returned from the card Issuer's Access Control Server (ACS)
+     * after the cardholder completes the authentication process.
+     * The response indicates the success or otherwise of the authentication.
+     * The 3DS AuthId is required so that merchants can submit payloads multiple times without producing
+     * duplicates in the database.
+     *
+     * @param string $threeDSecureId
+     * @param string $paRes
+     * @return array
+     * @throws Exception
+     */
+    public function process_asc_result($threeDSecureId, $paRes)
+    {
+        $data = array(
+            '3DSecure' => array(
+                'paRes' => $paRes
+            ),
+            'apiOperation' => 'PROCESS_ACS_RESULT'
+        );
+
+        $response = $this->sender(self::MPGS_POST, '3DSecureId/' . $threeDSecureId, $data);
+
+        /** @var Mastercard_Mpgs_Model_MpgsApi_Validator_AscResult $validator */
+        $validator = Mage::getModel('mpgs/mpgsApi_validator_ascResult');
+        $validator->validate($response);
+
+        return $response;
+    }
+
+    /**
      * This method creates a checkout session on MPGS.
      *
      * @param string $mpgs_id
@@ -198,6 +268,11 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data['session'] = $rest->buildSessionData($order->getPayment()->getAdditionalInformation('session'));
         $data['sourceOfFunds'] = $rest->buildSourceOfFunds();
 
+        $threeDSecureId = $order->getPayment()->getAdditionalInformation('3DSecureId');
+        if ($threeDSecureId) {
+            $data['3DSecureId'] = $threeDSecureId;
+        }
+
         $txnId = uniqid(sprintf('%s-', $orderId));
         return $this->sender(self::MPGS_PUT, 'order/' . $orderId . '/transaction/' . $txnId, $data);
     }
@@ -224,6 +299,11 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data['order'] = $rest->buildOrderDataFromOrder($order, $this->config);
         $data['session'] = $rest->buildSessionData($order->getPayment()->getAdditionalInformation('session'));
         $data['sourceOfFunds'] = $rest->buildSourceOfFunds();
+
+        $threeDSecureId = $order->getPayment()->getAdditionalInformation('3DSecureId');
+        if ($threeDSecureId) {
+            $data['3DSecureId'] = $threeDSecureId;
+        }
 
         $txnId = uniqid(sprintf('%s-', $orderId));
         return $this->sender(self::MPGS_PUT, 'order/' . $orderId . '/transaction/' . $txnId, $data);

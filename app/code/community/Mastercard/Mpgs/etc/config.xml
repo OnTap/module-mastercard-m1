@@ -163,6 +163,7 @@
                 <end_point_url>https://eu-gateway.mastercard.com/</end_point_url>
                 <webhook_secret/>
                 <webhook_url/>
+                <three_d_secure>1</three_d_secure>
                 <debug>0</debug>
                 <test>0</test>
                 <order_status>processing</order_status>

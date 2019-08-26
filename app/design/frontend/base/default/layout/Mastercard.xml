@@ -1,4 +1,8 @@
 <?xml version="1.0"?>
+<!--
+  ~ Copyright (c) On Tap Networks Limited.
+  -->
+
 <layout version="0.1.0">
     <checkout_onepage_review>
         <reference name="checkout.onepage.review.info.items.after">

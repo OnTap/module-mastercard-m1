@@ -68,6 +68,15 @@
             $('payment_form_<?php echo $_code ?>').observe('payment-method:switched', this.loadAdapter.bind(this));
         },
 
+        threeDSecureEnabled: function () {
+            return this.config['3ds_enabled']
+        },
+
+        threeDSecureError: function (response) {
+            console.error('3DSecure Failed: %o', response);
+            throw new Error('3DSecure Failure');
+        },
+
         loadAdapter: function () {
             if (this.adapterLoaded) {
                 return;
@@ -99,6 +108,53 @@
             }.bind(this), 200);
         },
 
+        checkEnrolment: function (callback) {
+            var agreements = $('checkout-agreements');
+            var params = {};
+            if (agreements) {
+                Object.extend(params, agreements.serialize(true));
+            }
+
+            new Ajax.Request(this.config['3ds_check_enrolment_url'], {
+                method: 'POST',
+                parameters: Object.extend(params, {
+                    form_key: $$('[name=form_key]')[0].value
+                }),
+                onSuccess: callback,
+                onFailure: this.threeDSecureError.bind(this)
+            });
+        },
+
+        saveOrder: function () {
+            if (this.threeDSecureEnabled()) {
+                this.checkEnrolment(
+                    this.placeOrder.bind(this)
+                );
+            } else {
+                review.save();
+            }
+        },
+
+        placeOrder: function (response) {
+            if (response.responseJSON) {
+                var responseJSON = response.responseJSON;
+                if (responseJSON.error) {
+                    alert(responseJSON.error);
+                    return;
+                }
+
+                if (responseJSON['3DSecureBodyContent']) {
+                    document.open();
+                    document.write(responseJSON['3DSecureBodyContent']);
+                    document.close();
+                } else {
+                    review.save();
+                }
+            } else {
+                review.save();
+            }
+        },
+
         configure: function () {
             if ('payment' in window) {
                 var originalPaymentSave = payment.save.bind(payment);
@@ -107,6 +163,7 @@
                         if (payment.currentMethod !== '<?php echo $_code ?>') {
                             return originalPaymentSave();
                         }
+                        $$('#payment-buttons-container > button')[0].disable();
                         PaymentSession.updateSessionFromForm('card');
                     },
                     saveSuper: function () {
@@ -129,35 +186,38 @@
                 frameEmbeddingMitigation: ["javascript"],
                 callbacks: {
                     formSessionUpdate: function(response) {
-                        // HANDLE RESPONSE FOR UPDATE SESSION
+                        this.button.enable();
+                        var errors = [];
                         if (response.status) {
                             if ("ok" == response.status) {
                                 $('<?php echo $_code ?>_session_id').value = response.session.id;
-                                this.payment.saveSuper();
+                                window.payment.saveSuper();
                             } else if ("fields_in_error" == response.status)  {
-
-                                console.log("Session update failed with field errors.");
                                 if (response.errors.cardNumber) {
-                                    console.log("Card number invalid or missing.");
+                                    errors.push("Card number invalid or missing.")
                                 }
                                 if (response.errors.expiryYear) {
-                                    console.log("Expiry year invalid or missing.");
+                                    errors.push("Expiry year invalid or missing.");
                                 }
                                 if (response.errors.expiryMonth) {
-                                    console.log("Expiry month invalid or missing.");
+                                    errors.push("Expiry month invalid or missing.");
                                 }
                                 if (response.errors.securityCode) {
-                                    console.log("Security code invalid.");
+                                    errors.push("Security code invalid.");
                                 }
                             } else if ("request_timeout" == response.status)  {
-                                console.log("Session update failed with request timeout: " + response.errors.message);
+                                errors.push("Session update failed with request timeout: " + response.errors.message);
                             } else if ("system_error" == response.status)  {
-                                console.log("Session update failed with system error: " + response.errors.message);
+                                errors.push("Session update failed with system error: " + response.errors.message);
                             }
                         } else {
-                            console.log("Session update failed: " + response);
+                            errors.push("Session update failed: " + response);
                         }
-                    },
+                        if (errors.length > 0) {
+                            var errorStr = errors.join("\n");
+                            alert(errorStr);
+                        }
+                    }.bind(this),
                     interaction: {
                         displayControl: {
                             formatCard: "EMBOSSED",
@@ -173,5 +233,5 @@
         }
     };
 
-    new MasterCardForm(<?php echo $this->getJsConfig() ?>);
+    window.mastercardForm = new MasterCardForm(<?php echo $this->getJsConfig() ?>);
 </script>

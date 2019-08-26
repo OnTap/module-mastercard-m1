@@ -14,6 +14,7 @@ class Mastercard_Mpgs_Model_Config_Form extends Mastercard_Mpgs_Model_Config
     protected $pathApiPassword = 'payment/Mastercard_form/api_password';
     protected $pathEndpointUrl = 'payment/Mastercard_form/end_point_url';
     protected $pathWebhookSecret = 'payment/Mastercard_form/webhook_secret';
+    protected $pathThreeDSecure = 'payment/Mastercard_form/three_d_secure';
 
     /**
      * @return string
@@ -32,5 +33,13 @@ class Mastercard_Mpgs_Model_Config_Form extends Mastercard_Mpgs_Model_Config
         $url .= sprintf('form/version/%s/merchant/%s/session.js', self::API_VERSION, $this->getApiUsername());
 
         return $url;
+    }
+
+    /**
+     * @return bool
+     */
+    public function get3dSecureEnabled()
+    {
+        return (bool) Mage::getStoreConfig($this->pathThreeDSecure);
     }
 }

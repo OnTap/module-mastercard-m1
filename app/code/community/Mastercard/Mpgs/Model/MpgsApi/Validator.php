@@ -85,6 +85,25 @@ class Mastercard_Mpgs_Model_MpgsApi_Validator extends Varien_Object
     const FAILURE = 'FAILURE';
 
     /**
+     * @param $result
+     * @param array $errors
+     * @return bool
+     * @throws Mastercard_Mpgs_Model_MpgsApi_Validator_ValidationException
+     */
+    protected function createResult($result, $errors = array())
+    {
+        if (!$result) {
+            $messages = 'Validation Error';
+            if (!empty($errors)) {
+                $messages = implode("\n", $errors);
+            }
+            throw new Mastercard_Mpgs_Model_MpgsApi_Validator_ValidationException($messages);
+        }
+
+        return $result;
+    }
+
+    /**
      * @param array $response
      * @return bool
      * @throws Exception

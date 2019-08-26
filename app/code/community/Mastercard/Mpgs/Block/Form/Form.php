@@ -30,6 +30,8 @@ class Mastercard_Mpgs_Block_Form_Form extends Mage_Payment_Block_Form_Cc
             'cart_id' => $this->getQuote()->getId(),
             'create_session_url' => Mage::getUrl('mastercard/checkout/createSession', array('_secure' => true)),
             'merchant' => $config->getApiUsername(),
+            '3ds_enabled' => $config->get3dSecureEnabled(),
+            '3ds_check_enrolment_url' => Mage::getUrl('mastercard/threedsecure/enrolment', array('_secure' => true))
         ));
     }
 }

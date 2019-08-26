@@ -156,6 +156,18 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      * @param $payment
      * @param $data
      */
+    public function add3DSInfo($payment, $data)
+    {
+        if (isset($data['3DSecure'])) {
+            $payment->setAdditionalInformation('3dsecure_authenticationStatus', $data['3DSecure']['authenticationStatus']);
+            $payment->setAdditionalInformation('3dsecure_enrollmentStatus', $data['3DSecure']['enrollmentStatus']);
+        }
+    }
+
+    /**
+     * @param $payment
+     * @param $data
+     */
     public function addCardInfo( $payment, $data ) 
     {
         if (isset($data ['sourceOfFunds']) && isset($data ['sourceOfFunds'] ['provided'] ['card'])) {
@@ -193,6 +205,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         $this->addResult($payment, $data);
         $this->addRisk($payment, $data);
         $this->addCardInfo($payment, $data);
+        $this->add3DSInfo($payment, $data);
         $payment->save();
     }
 
@@ -394,6 +407,19 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
 
     /**
      * @param Mage_Sales_Model_Quote $quote
+     * @return array
+     */
+    public function buildOrderAmountFromQuote($quote)
+    {
+        $order = array();
+        $order['amount'] = sprintf('%.2F', $quote->getGrandTotal());
+        $order['currency'] = $quote->getStore()->getBaseCurrencyCode();
+
+        return $order;
+    }
+
+    /**
+     * @param Mage_Sales_Model_Quote $quote
      * @param string $type
      * @return array
      */
@@ -449,23 +475,25 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     public function getLabel($key)
     {
         $labels = array (
-                'response_gatewayCode' => 'Gateway Code',
-                'txn_result' => 'Transaction Result',
-                'auth_code' => 'Auth Code',
-                'card_scheme' => 'Card Scheme',
-                'card_number' => 'Card Number',
-                'card_expiry_date' => 'Card Expiry Date',
-                'fundingMethod' => 'Funding Method',
-                'issuer' => 'Card Issuer',
-                'nameOnCard' => 'Name on the Card',
-                'cvv_validation' => 'Cvv Validation',
-                'response.gatewayCode' => 'Risk Gateway Code',
-                'response.review.decision' => 'Risk Review',
-                'response.totalScore' => 'Risk total Score',
-                ".status" => 'Order Status',
-                ".totalAuthorizedAmount" => 'Total Authorized Amount',
-                ".totalCapturedAmount" => 'Total Captured Amount',
-                ".totalRefundedAmount" => 'Total Refunded Amount'
+            'response_gatewayCode' => 'Gateway Code',
+            'txn_result' => 'Transaction Result',
+            'auth_code' => 'Auth Code',
+            'card_scheme' => 'Card Scheme',
+            'card_number' => 'Card Number',
+            'card_expiry_date' => 'Card Expiry Date',
+            'fundingMethod' => 'Funding Method',
+            'issuer' => 'Card Issuer',
+            'nameOnCard' => 'Name on the Card',
+            'cvv_validation' => 'Cvv Validation',
+            'response.gatewayCode' => 'Risk Gateway Code',
+            'response.review.decision' => 'Risk Review',
+            'response.totalScore' => 'Risk total Score',
+            ".status" => 'Order Status',
+            ".totalAuthorizedAmount" => 'Total Authorized Amount',
+            ".totalCapturedAmount" => 'Total Captured Amount',
+            ".totalRefundedAmount" => 'Total Refunded Amount',
+            '3dsecure_authenticationStatus' => '3DSecure Authentication Status',
+            '3dsecure_enrollmentStatus' => '3DSecure Enrollment Status',
         );
 
         return (!empty($labels [$key])) ? $this->__($labels [$key]) : $key;

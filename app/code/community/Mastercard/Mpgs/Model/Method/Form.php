@@ -115,7 +115,9 @@ class Mastercard_Mpgs_Model_Method_Form extends Mastercard_Mpgs_Model_Method_Abs
         $order = $info->getOrder();
 
         if (empty($txnAuth)) {
+            $this->processAclResult($restAPI, $payment);
             $orderInfo = $restAPI->payFromSession($order);
+            $helper->updatePaymentInfo($payment, $orderInfo);
             $helper->addPayTnxPayment($payment, $orderInfo);
         } else {
             $orderInfo = $restAPI->capture_order(
@@ -144,21 +146,36 @@ class Mastercard_Mpgs_Model_Method_Form extends Mastercard_Mpgs_Model_Method_Abs
 
         $this->setAdditionalData($payment);
 
-        $order = $payment->getOrder();
-        $payment = $order->getPayment();
-
         /** @var Mastercard_Mpgs_Helper_MpgsRest $helper */
         $helper = Mage::helper('mpgs/mpgsRest');
 
         /** @var Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI */
         $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
 
-        $orderInfo = $restAPI->authorizeFromSession($order);
+        $this->processAclResult($restAPI, $payment);
+
+        $orderInfo = $restAPI->authorizeFromSession($payment->getOrder());
 
         $helper->updatePaymentInfo($payment, $orderInfo);
         $helper->updateTransferInfo($payment, $orderInfo);
         $helper->addAuthTxnPayment($payment, $orderInfo, false);
 
         return $this;
+    }
+
+    /**
+     * @param Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI
+     * @param Varien_Object $payment
+     * @throws Exception
+     */
+    protected function processAclResult($restAPI, $payment)
+    {
+        if ($this->getConfig()->get3dSecureEnabled() && !$payment->getAdditionalInformation('3DSecureNotEnrolled')) {
+            $paRes = $payment->getAdditionalInformation('PaRes');
+            $threeDSecureId = $payment->getAdditionalInformation('3DSecureId');
+            $restAPI->process_asc_result($threeDSecureId, $paRes);
+        } else {
+            $payment->setAdditionalInformation('3DSecureId', false);
+        }
     }
 }
