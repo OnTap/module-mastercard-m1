@@ -7,5 +7,7 @@
 $installer = $this;
 
 $installer->startSetup();
+
 $installer->addAttribute('quote_payment', 'mpgs_session_id', array());
+
 $installer->endSetup();

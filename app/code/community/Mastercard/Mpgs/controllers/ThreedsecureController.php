@@ -33,7 +33,13 @@ class Mastercard_Mpgs_ThreedsecureController extends Mastercard_Mpgs_Controller_
             $quote->save();
 
             $this->_redirect('checkout/onepage/success');
+        } catch (Mage_Payment_Model_Info_Exception $e) {
+            $quote = $this->getSession()->getQuote();
+            $quote->setReservedOrderId(null)->reserveOrderId();
+            $quote->save();
 
+            Mage::getSingleton('core/session')->addError($e->getMessage());
+            $this->_redirect('checkout/cart/index');
         } catch (Exception $e) {
             Mage::getSingleton('core/session')->addError($e->getMessage());
             $this->_redirect('checkout/cart/index');
@@ -81,7 +87,7 @@ class Mastercard_Mpgs_ThreedsecureController extends Mastercard_Mpgs_Controller_
                 );
 
                 $data = array(
-                    'status' => $response['3DSecure']['summaryStatus'],
+                    'veResEnrolled' => $response['3DSecure']['veResEnrolled'],
                     'xid' => $response['3DSecure']['xid'],
                 );
 

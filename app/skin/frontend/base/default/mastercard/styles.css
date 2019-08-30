@@ -1,0 +1,23 @@
+/*
+ * Copyright (c) On Tap Networks Limited.
+ */
+li.mpgs_save_card_control .input-box {
+    display: inline-block;
+    padding-right: 5px;
+}
+label span.remove_card a {
+    margin: 0;
+    float: none;
+}
+ul.mpgs_saved_card_group_content input {
+    width: 4em !important;
+}
+li.mpgs_saved_card_group {
+    padding: 10px 0 0 10px;
+}
+li.mpgs_new_card_group {
+    padding-left: 10px;
+}
+ul.mpgs_saved_card_group_content, ul#mpgs_new_card_group_content {
+    padding: 10px 0 0 16px;
+}

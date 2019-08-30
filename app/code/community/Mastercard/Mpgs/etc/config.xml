@@ -6,7 +6,7 @@
 <config>
     <modules>
         <Mastercard_Mpgs>
-            <version>1.2.0.0</version>
+            <version>1.2.1.0</version>
         </Mastercard_Mpgs>
     </modules>
     <global>
@@ -163,6 +163,8 @@
                 <end_point_url>https://eu-gateway.mastercard.com/</end_point_url>
                 <webhook_secret/>
                 <webhook_url/>
+                <save_card>0</save_card>
+                <save_card_use_cvv>1</save_card_use_cvv>
                 <three_d_secure>1</three_d_secure>
                 <debug>0</debug>
                 <test>0</test>

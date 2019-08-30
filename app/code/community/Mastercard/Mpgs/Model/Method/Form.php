@@ -47,6 +47,16 @@ class Mastercard_Mpgs_Model_Method_Form extends Mastercard_Mpgs_Model_Method_Abs
     }
 
     /**
+     * Get one page checkout model
+     *
+     * @return Mage_Checkout_Model_Type_Onepage
+     */
+    public function getOnepage()
+    {
+        return Mage::getSingleton('checkout/type_onepage');
+    }
+
+    /**
      * @param Mage_Sales_Model_Order_Payment|Varien_Object $payment
      * @return $this;
      * @throws Mage_Core_Exception
@@ -66,12 +76,15 @@ class Mastercard_Mpgs_Model_Method_Form extends Mastercard_Mpgs_Model_Method_Abs
 
         if ($quote) {
             $quotePayment = $quote->getPayment();
-            $sessionId = $quotePayment->getData('mpgs_session_id');
 
+            $sessionId = $quotePayment->getData('mpgs_session_id');
             if ($sessionId) {
                 $sessionInfo = $restAPI->get_session($sessionId);
                 $payment->setAdditionalInformation('session', $sessionInfo['session']);
             }
+
+            $payment->setAdditionalInformation('mpgs_save_card', $quotePayment->getData('mpgs_save_card'));
+            $payment->setAdditionalInformation('mpgs_token_hash', $quotePayment->getData('mpgs_token_hash'));
         }
 
         $payment->save();
@@ -114,18 +127,33 @@ class Mastercard_Mpgs_Model_Method_Form extends Mastercard_Mpgs_Model_Method_Abs
         /** @var Mage_Sales_Model_Order $order */
         $order = $info->getOrder();
 
-        if (empty($txnAuth)) {
-            $this->processAclResult($restAPI, $payment);
-            $orderInfo = $restAPI->payFromSession($order);
-            $helper->updatePaymentInfo($payment, $orderInfo);
-            $helper->addPayTnxPayment($payment, $orderInfo);
-        } else {
-            $orderInfo = $restAPI->capture_order(
-                $order->getIncrementId(),
-                $amount,
-                $order->getOrderCurrencyCode()
-            );
-            $helper->addCaptureTxnPayment($payment, $orderInfo, $txnAuth->getTxnId(), $helper->isAllPaid($payment, $captureInfo));
+        try {
+            if (empty($txnAuth)) {
+                $this->processAclResult($restAPI, $payment);
+                $this->processCreateToken($restAPI, $payment);
+
+                $orderInfo = $restAPI->payFromSession($order);
+                $helper->updatePaymentInfo($payment, $orderInfo);
+                $helper->addPayTnxPayment($payment, $orderInfo);
+            } else {
+                $orderInfo = $restAPI->capture_order(
+                    $order->getIncrementId(),
+                    $amount,
+                    $order->getOrderCurrencyCode()
+                );
+                $helper->addCaptureTxnPayment($payment, $orderInfo, $txnAuth->getTxnId(), $helper->isAllPaid($payment, $captureInfo));
+            }
+        } catch (Mastercard_Mpgs_Model_MpgsApi_Validator_BlockedException $e) {
+            $session = $this->getOnepage()->getCheckout();
+            $session->clear();
+            throw new Mage_Payment_Model_Info_Exception($e->getMessage(), 1, $e);
+        } catch (Mage_Payment_Model_Info_Exception $e) {
+            $order = $payment->getOrder();
+            $quote = $order->getQuote();
+            $quote->setReservedOrderId(null)->reserveOrderId();
+            throw $e;
+        } catch (Exception $e) {
+            throw new Mage_Payment_Model_Info_Exception($e->getMessage());
         }
 
         $helper->updateTransferInfo($payment, $orderInfo);
@@ -153,8 +181,22 @@ class Mastercard_Mpgs_Model_Method_Form extends Mastercard_Mpgs_Model_Method_Abs
         $restAPI = Mage::getSingleton('mpgs/restFactory')->get($payment);
 
         $this->processAclResult($restAPI, $payment);
+        $this->processCreateToken($restAPI, $payment);
 
-        $orderInfo = $restAPI->authorizeFromSession($payment->getOrder());
+        try {
+            $orderInfo = $restAPI->authorizeFromSession($payment->getOrder());
+        } catch (Mastercard_Mpgs_Model_MpgsApi_Validator_BlockedException $e) {
+            $session = $this->getOnepage()->getCheckout();
+            $session->clear();
+            throw new Mage_Payment_Model_Info_Exception($e->getMessage(), 1, $e);
+        } catch (Mage_Payment_Model_Info_Exception $e) {
+            $order = $payment->getOrder();
+            $quote = $order->getQuote();
+            $quote->setReservedOrderId(null)->reserveOrderId();
+            throw $e;
+        } catch (Exception $e) {
+            throw new Mage_Payment_Model_Info_Exception($e->getMessage());
+        }
 
         $helper->updatePaymentInfo($payment, $orderInfo);
         $helper->updateTransferInfo($payment, $orderInfo);
@@ -165,17 +207,55 @@ class Mastercard_Mpgs_Model_Method_Form extends Mastercard_Mpgs_Model_Method_Abs
 
     /**
      * @param Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI
-     * @param Varien_Object $payment
+     * @param Mage_Sales_Model_Order_Payment|Varien_Object $payment
      * @throws Exception
      */
     protected function processAclResult($restAPI, $payment)
     {
+        if ($payment->getAdditionalInformation('mpgs_token_hash')) {
+            $payment->setAdditionalInformation('3DSecureId', false);
+            return;
+        }
+
         if ($this->getConfig()->get3dSecureEnabled() && !$payment->getAdditionalInformation('3DSecureNotEnrolled')) {
             $paRes = $payment->getAdditionalInformation('PaRes');
             $threeDSecureId = $payment->getAdditionalInformation('3DSecureId');
             $restAPI->process_asc_result($threeDSecureId, $paRes);
         } else {
             $payment->setAdditionalInformation('3DSecureId', false);
+        }
+    }
+
+    /**
+     * @param Mastercard_Mpgs_Model_MpgsApi_Rest $restAPI
+     * @param Mage_Sales_Model_Order_Payment|Varien_Object $payment
+     * @throws Exception
+     */
+    protected function processCreateToken($restAPI, $payment)
+    {
+        $saveCard = $payment->getAdditionalInformation('mpgs_save_card');
+
+        if ($saveCard && !$payment->getOrder()->getCustomerIsGuest()) {
+            $session = $payment->getAdditionalInformation('session');
+
+            try {
+                /** @var Mage_Customer_Model_Customer $customer */
+                $customer = Mage::getModel('customer/customer')->load(
+                    $payment->getOrder()->getCustomerId()
+                );
+
+                $response = $restAPI->create_token($session['id']);
+
+                /** @var Mastercard_Mpgs_Model_Token $token */
+                $token = Mage::getModel('mpgs/token');
+                $token->createTokenFromResponse($response);
+
+                $customer
+                    ->setData('mpgs_card_token', $token->asJson())
+                    ->save();
+            } catch (Exception $e) {
+                Mage::logException($e);
+            }
         }
     }
 }

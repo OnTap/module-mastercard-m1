@@ -1,46 +1,92 @@
+<?php /** @var Mastercard_Mpgs_Block_Form_Form $this */?>
 <?php $_code = $this->getMethodCode() ?>
+<?php $savedCards = $this->getSavedCards() ?>
 
 <style id="antiClickjack">body{display:none !important;}</style>
 
 <ul class="form-list" id="payment_form_<?php echo $this->getMethodCode() ?>" style="display:none;">
     <li style="display: none">
         <input id="<?php echo $_code ?>_session_id" type="hidden" name="payment[mpgs_session_id]" value="" />
+        <input id="<?php echo $_code ?>_token_hash" type="hidden" name="payment[mpgs_token_hash]" value="" />
     </li>
-    <li>
-        <label for="<?php echo $_code ?>_cc_number" class="required"><em>*</em><?php echo $this->__('Credit Card Number') ?></label>
-        <div class="input-box">
-            <input type="text" id="<?php echo $_code ?>_cc_number" title="<?php echo Mage::helper('core')->jsQuoteEscape($this->__('Credit Card Number')) ?>" class="input-text" value="" readonly />
-        </div>
+
+    <?php foreach ($savedCards as $idx => $card): ?>
+    <li class="mpgs_saved_card_group">
+        <input type="radio" id="<?php echo $_code ?>_saved_card_<?php echo $idx ?>" name="mpgs_payment_group" value="<?php echo $idx+1 ?>" />
+        <label for="<?php echo $_code ?>_saved_card_<?php echo $idx ?>">
+            <span><?php echo $this->__('Use saved card:') ?></span>
+            <span>
+                <?php $_card = $card->getCard() ?>
+                <span><?php echo $_card['brand'] ?> <?php echo $_card['maskedCc'] ?></span>
+            </span>
+            <span class="remove_card">
+                <?php echo $this->__('(or <a href="" onclick="return mastercardForm.removeToken();">click here</a> to remove it from our system)') ?>
+            </span>
+        </label>
+        <ul class="mpgs_saved_card_group_content">
+            <?php if ($this->getSavedCardsRequireCvv()): ?>
+            <li>
+                <label for="card_cvv_field_<?php echo $idx+1 ?>"><?php echo $this->__('Security Code') ?></label>
+                <div class="input-box">
+                    <input class="input-text" id="card_cvv_field_<?php echo $idx+1 ?>" type="text" value="" readonly />
+                </div>
+            </li>
+            <?php endif; ?>
+        </ul>
     </li>
-    <li id="<?php echo $_code ?>_cc_type_exp_div">
-        <label for="<?php echo $_code ?>_expiration" class="required"><em>*</em><?php echo $this->__('Expiration Date') ?></label>
-        <div class="input-box">
-            <div class="v-fix">
-                <select id="<?php echo $_code ?>_expiration" class="month">
-                    <?php $_ccExpMonth = $this->getInfoData('cc_exp_month') ?>
-                    <?php foreach ($this->getCcMonths() as $k=>$v): ?>
-                        <option value="<?php echo $k?$k:'' ?>"><?php echo $v ?></option>
-                    <?php endforeach ?>
-                </select>
-            </div>
-            <div class="v-fix">
-                <?php $_ccExpYear = $this->getInfoData('cc_exp_year') ?>
-                <select id="<?php echo $_code ?>_expiration_yr" class="year">
-                    <?php foreach ($this->getCcYears() as $k=>$v): ?>
-                        <option value="<?php echo $k?$k:'' ?>"><?php echo $v ?></option>
-                    <?php endforeach ?>
-                </select>
-            </div>
-        </div>
-    </li>
-    <li id="<?php echo $_code ?>_cc_type_cvv_div">
-        <label for="<?php echo $_code ?>_cc_cid" class="required"><em>*</em><?php echo $this->__('Card Verification Number') ?></label>
-        <div class="input-box">
-            <div class="v-fix">
-                <input type="text" title="<?php echo Mage::helper('core')->jsQuoteEscape($this->__('Card Verification Number')) ?>" class="input-text cvv" id="<?php echo $_code ?>_cc_cid" value="" readonly />
-            </div>
-            <a href="#" class="cvv-what-is-this"><?php echo $this->__('What is this?') ?></a>
-        </div>
+    <?php endforeach; ?>
+
+    <li class="mpgs_new_card_group">
+        <?php if (!empty($savedCards)): ?>
+            <input id="mpgs_new_card_group" type="radio" name="mpgs_payment_group" value="0" />
+            <label for="mpgs_new_card_group"><?php echo $this->__('Use a different card') ?></label>
+        <?php endif; ?>
+        <ul id="mpgs_new_card_group_content">
+            <li>
+                <label for="<?php echo $_code ?>_cc_number" class="required"><em>*</em><?php echo $this->__('Credit Card Number') ?></label>
+                <div class="input-box">
+                    <input type="text" id="<?php echo $_code ?>_cc_number" title="<?php echo Mage::helper('core')->jsQuoteEscape($this->__('Credit Card Number')) ?>" class="input-text" value="" readonly />
+                </div>
+            </li>
+            <li id="<?php echo $_code ?>_cc_type_exp_div">
+                <label for="<?php echo $_code ?>_expiration" class="required"><em>*</em><?php echo $this->__('Expiration Date') ?></label>
+                <div class="input-box">
+                    <div class="v-fix">
+                        <select style="height: 30px" id="<?php echo $_code ?>_expiration" class="month" readonly>
+                            <?php $_ccExpMonth = $this->getInfoData('cc_exp_month') ?>
+                            <?php foreach ($this->getCcMonths() as $k=>$v): ?>
+                                <option value="<?php echo $k?$k:'' ?>"><?php echo $v ?></option>
+                            <?php endforeach ?>
+                        </select>
+                    </div>
+                    <div class="v-fix">
+                        <?php $_ccExpYear = $this->getInfoData('cc_exp_year') ?>
+                        <select style="height: 30px" id="<?php echo $_code ?>_expiration_yr" class="year" readonly>
+                            <?php foreach ($this->getCcYears() as $k=>$v): ?>
+                                <option value="<?php echo $k?$k:'' ?>"><?php echo $v ?></option>
+                            <?php endforeach ?>
+                        </select>
+                    </div>
+                </div>
+            </li>
+            <li id="<?php echo $_code ?>_cc_type_cvv_div">
+                <label for="<?php echo $_code ?>_cc_cid" class="required"><em>*</em><?php echo $this->__('Card Verification Number') ?></label>
+                <div class="input-box">
+                    <div class="v-fix">
+                        <input type="text" title="<?php echo Mage::helper('core')->jsQuoteEscape($this->__('Card Verification Number')) ?>" class="input-text cvv" id="<?php echo $_code ?>_cc_cid" value="" readonly />
+                    </div>
+                    <a href="#" class="cvv-what-is-this"><?php echo $this->__('What is this?') ?></a>
+                </div>
+            </li>
+            <?php if ($this->getSavedCardsEnabled()): ?>
+            <li id="<?php echo $_code ?>_save_card" class="mpgs_save_card_control">
+                <div class="input-box">
+                    <input id="<?php echo $_code ?>_save_card_enabled" type="checkbox" value="1" name="payment[mpgs_save_card]" />
+                </div>
+                <label for="<?php echo $_code ?>_save_card_enabled"><?php echo $this->__('Save this card for later use?') ?></label>
+            </li>
+            <?php endif; ?>
+        </ul>
     </li>
 </ul>
 
@@ -61,15 +107,91 @@
         adapterLoaded: false,
 
         initialize: function (config) {
-            this.button = $$('#payment-buttons-container > button')[0];
+            window.PaymentSession = undefined;
+
+            this.button = $$('#payment-buttons-container > button').first();
             this.loader = $('payment-please-wait');
             this.config = config;
 
             $('payment_form_<?php echo $_code ?>').observe('payment-method:switched', this.loadAdapter.bind(this));
+
+            $$('[name="mpgs_payment_group"]').map(function (elem) {
+                elem.observe('change', function (e) {
+                    $$('.mpgs_saved_card_group_content').map(function (elem) {
+                        elem.hide();
+                    });
+                    var idx = $F(e.element());
+                    if (idx === "0") {
+                        $('mpgs_new_card_group_content').show();
+                    } else {
+                        $('mpgs_new_card_group_content').hide();
+                        var parent = e.element().parentNode;
+                        parent.select('ul').first().show();
+                        this.initializeTokenPayment(parent, idx);
+                    }
+                }.bind(this));
+            }, this);
+
+            if ($$('[name="mpgs_payment_group"]').length > 1) {
+                $$('[name="mpgs_payment_group"]').first().click();
+            }
+        },
+
+        initializeTokenPayment: function (container, id) {
+            if (!this.config['saved_cards_require_cvv']) {
+                return;
+            }
+
+            this.waitUntilReady(function () {
+                PaymentSession.configure({
+                    fields: {
+                        card: {
+                            securityCode: '#card_cvv_field_' + id
+                        }
+                    },
+                    frameEmbeddingMitigation: ["javascript"],
+                    callbacks: {
+                        formSessionUpdate: function(response) {
+                            var errors = [];
+                            if (response.status) {
+                                if ("ok" == response.status) {
+                                    $('<?php echo $_code ?>_session_id').value = response.session.id;
+                                    window.payment.saveSuper();
+                                } else if ("fields_in_error" == response.status)  {
+                                    if (response.errors.securityCode) {
+                                        errors.push("Security code invalid.");
+                                    }
+                                } else if ("request_timeout" == response.status)  {
+                                    errors.push("Session update failed with request timeout: " + response.errors.message);
+                                } else if ("system_error" == response.status)  {
+                                    errors.push("Session update failed with system error: " + response.errors.message);
+                                }
+                            } else {
+                                errors.push("Session update failed: " + response);
+                            }
+                            if (errors.length > 0) {
+                                var errorStr = errors.join("\n");
+                                alert(errorStr);
+                            }
+                            this.button.enable();
+                        }.bind(this),
+                        interaction: {
+                            displayControl: {
+                                formatCard: "EMBOSSED",
+                                invalidFieldCharacters: "REJECT"
+                            }
+                        }
+                    }
+                }, 'card_' + id);
+            }.bind(this));
         },
 
         threeDSecureEnabled: function () {
-            return this.config['3ds_enabled']
+            return this.config['3ds_enabled'];
+        },
+
+        savedCardsEnabled: function () {
+            return this.config['saved_cards_enabled'];
         },
 
         threeDSecureError: function (response) {
@@ -109,29 +231,33 @@
         },
 
         checkEnrolment: function (callback) {
+            var params = $(payment.form).serialize(true);
+
             var agreements = $('checkout-agreements');
-            var params = {};
             if (agreements) {
                 Object.extend(params, agreements.serialize(true));
             }
 
             new Ajax.Request(this.config['3ds_check_enrolment_url'], {
                 method: 'POST',
-                parameters: Object.extend(params, {
-                    form_key: $$('[name=form_key]')[0].value
-                }),
+                parameters: params,
                 onSuccess: callback,
                 onFailure: this.threeDSecureError.bind(this)
             });
         },
 
+        getUsingNewCard: function () {
+            var groups = $$('[name=mpgs_payment_group]:checked');
+            return groups.length === 0 ? true : $F(groups.first()) === "0";
+        },
+
         saveOrder: function () {
-            if (this.threeDSecureEnabled()) {
+            if (this.threeDSecureEnabled() && this.getUsingNewCard()) {
                 this.checkEnrolment(
                     this.placeOrder.bind(this)
                 );
             } else {
-                review.save();
+                this.reviewSave();
             }
         },
 
@@ -148,28 +274,89 @@
                     document.write(responseJSON['3DSecureBodyContent']);
                     document.close();
                 } else {
-                    review.save();
+                    this.reviewSave();
                 }
             } else {
-                review.save();
+                this.reviewSave();
+            }
+        },
+
+        reviewSave: function () {
+            review.save();
+            window.PaymentSession = undefined;
+        },
+
+        removeToken: function (e) {
+            if (confirm('Are you sure you want to remove the existing card from your account?')) {
+                var params = {};
+                new Ajax.Request(this.config['remove_token_url'], {
+                    method: 'POST',
+                    parameters: Object.extend(params, {
+                        form_key: $$('[name=form_key]')[0].value
+                    }),
+                    onSuccess: this.updateTokenUi.bind(this, e),
+                    onFailure: this.tokenAjaxError.bind(this, e)
+                });
+            }
+
+            return false;
+        },
+
+        showNewCardGroup: function () {
+            $('mpgs_new_card_group').click();
+            $('<?php echo $_code ?>_save_card_enabled').checked = false;
+            $$('li.mpgs_saved_card_group').map(function (elem) {
+                elem.hide();
+            });
+            $$('.mpgs_new_card_group > input, .mpgs_new_card_group > label').map(function (elem) {
+                elem.hide();
+            });
+        },
+
+        tokenAjaxError: function (button, response) {
+            console.error(response.statusMessage);
+            alert('Saved card could not be removed, try again later.');
+            button.enable();
+        },
+
+        updateTokenUi: function (button, response) {
+            this.showNewCardGroup();
+            button.enable();
+        },
+
+        updateSessionFromForm: function () {
+            $('<?php echo $_code ?>_token_hash').value = '';
+            if (this.getUsingNewCard()) {
+                PaymentSession.updateSessionFromForm('card', undefined, 'new_card');
+            } else {
+                var idx = $F($$('[name=mpgs_payment_group]:checked').first());
+                $('<?php echo $_code ?>_token_hash').value = idx;
+
+                if (this.config['saved_cards_require_cvv']) {
+                    PaymentSession.updateSessionFromForm('card', undefined, 'card_' + idx);
+                } else {
+                    window.payment.saveSuper();
+                }
             }
         },
 
         configure: function () {
             if ('payment' in window) {
-                var originalPaymentSave = payment.save.bind(payment);
-                Object.extend(payment, {
-                    save: function () {
-                        if (payment.currentMethod !== '<?php echo $_code ?>') {
+                if (payment.saveSuper === undefined) {
+                    var originalPaymentSave = payment.save.bind(payment);
+                    Object.extend(payment, {
+                        save: function () {
+                            if (payment.currentMethod !== '<?php echo $_code ?>') {
+                                return originalPaymentSave();
+                            }
+                            $$('#payment-buttons-container > button')[0].disable();
+                            mastercardForm.updateSessionFromForm()
+                        },
+                        saveSuper: function () {
                             return originalPaymentSave();
                         }
-                        $$('#payment-buttons-container > button')[0].disable();
-                        PaymentSession.updateSessionFromForm('card');
-                    },
-                    saveSuper: function () {
-                        return originalPaymentSave();
-                    }
-                });
+                    });
+                }
             } else {
                 throw new Error('Payment object not found, is opcheckout.js loaded?');
             }
@@ -225,7 +412,7 @@
                         }
                     }
                 }
-            });
+            }, 'new_card');
 
             this.loader.hide();
             this.button.enable();

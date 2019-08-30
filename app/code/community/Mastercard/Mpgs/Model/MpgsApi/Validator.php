@@ -81,6 +81,12 @@ class Mastercard_Mpgs_Model_MpgsApi_Validator extends Varien_Object
         self::UNKNOWN => 'The result of the operation is unknown.',
     );
 
+    private $blockedExceptions = array(
+        self::BLOCKED,
+        self::LOCK_FAILURE,
+        self::PARTIALLY_APPROVED,
+    );
+
     const SUCCESS = 'SUCCESS';
     const FAILURE = 'FAILURE';
 
@@ -120,6 +126,14 @@ class Mastercard_Mpgs_Model_MpgsApi_Validator extends Varien_Object
                 throw new Exception($msg);
             }
 
+            if (isset($response['response']['gatewayCode'])) {
+                if (in_array($response['response']['gatewayCode'], $this->blockedExceptions)) {
+                    throw new Mastercard_Mpgs_Model_MpgsApi_Validator_BlockedException(
+                        $this->gatewayCode[$response['response']['gatewayCode']]
+                    );
+                }
+            }
+
             $errors = array();
             switch ($response['result']) {
                 case self::SUCCESS:
@@ -134,7 +148,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Validator extends Varien_Object
             }
 
             if (!empty($errors)) {
-                throw new Exception(implode("\n", $errors));
+                throw new Mage_Payment_Model_Info_Exception(implode("\n", $errors));
             }
         }
 

@@ -5,6 +5,8 @@
 
 class Mastercard_Mpgs_Model_Config_Form extends Mastercard_Mpgs_Model_Config
 {
+    const API_VERSION = '52';
+
     protected $pathCurrency = 'payment/Mastercard_form/currency';
     protected $pathCustomEndPointUrl = 'payment/Mastercard_form/end_point_custom';
     protected $pathTestMode = 'payment/Mastercard_form/test';
@@ -15,6 +17,8 @@ class Mastercard_Mpgs_Model_Config_Form extends Mastercard_Mpgs_Model_Config
     protected $pathEndpointUrl = 'payment/Mastercard_form/end_point_url';
     protected $pathWebhookSecret = 'payment/Mastercard_form/webhook_secret';
     protected $pathThreeDSecure = 'payment/Mastercard_form/three_d_secure';
+    protected $pathSavedCards = 'payment/Mastercard_form/save_card';
+    protected $pathSavedCardsRequireCvv = 'payment/Mastercard_form/save_card_use_cvv';
 
     /**
      * @return string
@@ -30,7 +34,7 @@ class Mastercard_Mpgs_Model_Config_Form extends Mastercard_Mpgs_Model_Config
     public function getJsComponentUrl()
     {
         $url = $this->getEndPointUrl();
-        $url .= sprintf('form/version/%s/merchant/%s/session.js', self::API_VERSION, $this->getApiUsername());
+        $url .= sprintf('form/version/%s/merchant/%s/session.js', static::API_VERSION, $this->getApiUsername());
 
         return $url;
     }
@@ -41,5 +45,25 @@ class Mastercard_Mpgs_Model_Config_Form extends Mastercard_Mpgs_Model_Config
     public function get3dSecureEnabled()
     {
         return (bool) Mage::getStoreConfig($this->pathThreeDSecure);
+    }
+
+    /**
+     * @return bool
+     */
+    public function getSavedCardsEnabled()
+    {
+        $customer = Mage::getSingleton('customer/session');
+        if (!$customer->isLoggedIn()) {
+            return false;
+        }
+        return (bool) Mage::getStoreConfig($this->pathSavedCards);
+    }
+
+    /**
+     * @return bool
+     */
+    public function getSavedCardsRequireCvv()
+    {
+        return (bool) Mage::getStoreConfig($this->pathSavedCardsRequireCvv);
     }
 }

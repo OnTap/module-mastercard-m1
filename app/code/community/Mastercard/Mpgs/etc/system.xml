@@ -264,8 +264,26 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </webhook_url>
+                        <save_card translate="label">
+                            <label>Saved Cards</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>63</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </save_card>
+                        <save_card_use_cvv translate="label">
+                            <label>Require CCV for tokenized card transactions</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>64</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </save_card_use_cvv>
                         <three_d_secure translate="label">
-                            <label>Enable 3-D Secure</label>
+                            <label>3D Secure</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>65</sort_order>

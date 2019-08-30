@@ -142,7 +142,7 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
     public function getRestApiUrl() 
     {
         $url = $this->getEndPointUrl();
-        $url .= 'api/rest/version/' . self::API_VERSION . '/merchant/';
+        $url .= 'api/rest/version/' . static::API_VERSION . '/merchant/';
 
         return $url;
     }

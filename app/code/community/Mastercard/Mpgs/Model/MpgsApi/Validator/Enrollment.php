@@ -13,14 +13,13 @@ class Mastercard_Mpgs_Model_MpgsApi_Validator_Enrollment extends Mastercard_Mpgs
      */
     public function validate($response)
     {
-        $status = $response['3DSecure']['summaryStatus'];
+        $status = $response['3DSecure']['veResEnrolled'];
 
         switch ($status) {
-            case 'CARD_DOES_NOT_SUPPORT_3DS':
-            case 'CARD_NOT_ENROLLED':
+            case 'N':
                 throw new Mastercard_Mpgs_Model_MpgsApi_Validator_NotEnrolledException('Card not enrolled');
 
-            case 'CARD_ENROLLED':
+            case 'Y':
                 return true;
 
             default:

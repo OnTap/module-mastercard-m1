@@ -203,6 +203,28 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
     }
 
     /**
+     * Request for the gateway to store payment instrument (e.g. credit or debit cards, gift cards,
+     * ACH bank account details) against a token, where the system generates the token id.
+     * @param string $sessionId
+     * @return array
+     * @throws Exception
+     */
+    public function create_token($sessionId)
+    {
+        $data = array(
+            'session' => array(
+                'id' => $sessionId
+            ),
+            'sourceOfFunds' => array(
+                'type' => 'CARD'
+            )
+        );
+        $response = $this->sender(self::MPGS_POST, 'token/', $data);
+        // @todo validation
+        return $response;
+    }
+
+    /**
      * @param array $session
      * @return array
      * @throws Exception
@@ -261,12 +283,19 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
             'apiOperation' => 'AUTHORIZE'
         );
 
+        $session = $order->getPayment()->getAdditionalInformation('session');
+
         $data['customer'] = $rest->buildCustomerData($order);
         $data['billing'] = $rest->buildBillingData($order);
         $data['shipping'] = $rest->buildShippingData($order);
         $data['order'] = $rest->buildOrderDataFromOrder($order, $this->config);
-        $data['session'] = $rest->buildSessionData($order->getPayment()->getAdditionalInformation('session'));
-        $data['sourceOfFunds'] = $rest->buildSourceOfFunds();
+        if ($session['id']) {
+            $data['session'] = $rest->buildSessionData($order->getPayment()->getAdditionalInformation('session'));
+        }
+        $data['sourceOfFunds'] = $rest->buildSourceOfFunds($order->getPayment());
+        $data['transaction'] = array(
+            'source' => 'INTERNET'
+        );
 
         $threeDSecureId = $order->getPayment()->getAdditionalInformation('3DSecureId');
         if ($threeDSecureId) {
@@ -298,7 +327,10 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data['shipping'] = $rest->buildShippingData($order);
         $data['order'] = $rest->buildOrderDataFromOrder($order, $this->config);
         $data['session'] = $rest->buildSessionData($order->getPayment()->getAdditionalInformation('session'));
-        $data['sourceOfFunds'] = $rest->buildSourceOfFunds();
+        $data['sourceOfFunds'] = $rest->buildSourceOfFunds($order->getPayment());
+        $data['transaction'] = array(
+            'source' => 'INTERNET'
+        );
 
         $threeDSecureId = $order->getPayment()->getAdditionalInformation('3DSecureId');
         if ($threeDSecureId) {

@@ -12,20 +12,17 @@ class Mastercard_Mpgs_Model_MpgsApi_Validator_AscResult extends Mastercard_Mpgs_
      */
     public function validate($response)
     {
-        if (!isset($response['3DSecure']['summaryStatus'])) {
+        if (!isset($response['response']['gatewayRecommendation'])) {
             return $this->createResult(false, array(Mage::helper('core')->__('3D-Secure verification error.')));
         }
 
-        switch ($response['3DSecure']['summaryStatus']) {
-            case 'AUTHENTICATION_SUCCESSFUL':
-            case 'CARD_DOES_NOT_SUPPORT_3DS':
+        switch ($response['response']['gatewayRecommendation']) {
+            case 'PROCEED':
                 $result = $this->createResult(true);
                 break;
 
             default:
-            case 'AUTHENTICATION_NOT_AVAILABLE':
-            case 'AUTHENTICATION_FAILED':
-            case 'AUTHENTICATION_ATTEMPTED':
+            case 'DO_NOT_PROCEED':
                 $result = $this->createResult(false, array(Mage::helper('core')->__('Transaction declined by 3D-Secure validation.')));
                 break;
         }

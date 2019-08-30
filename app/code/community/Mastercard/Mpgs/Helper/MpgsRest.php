@@ -159,8 +159,8 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     public function add3DSInfo($payment, $data)
     {
         if (isset($data['3DSecure'])) {
-            $payment->setAdditionalInformation('3dsecure_authenticationStatus', $data['3DSecure']['authenticationStatus']);
-            $payment->setAdditionalInformation('3dsecure_enrollmentStatus', $data['3DSecure']['enrollmentStatus']);
+            $payment->setAdditionalInformation('3dsecure_authenticationStatus', $data['3DSecure']['paResStatus']);
+            $payment->setAdditionalInformation('3dsecure_enrollmentStatus', $data['3DSecure']['veResEnrolled']);
         }
     }
 
@@ -433,13 +433,28 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @return array
      */
-    public function buildSourceOfFunds()
+    public function buildSourceOfFunds($payment)
     {
-        return array(
+        $source = array(
             'type' => 'CARD'
         );
+
+        $token = $payment->getAdditionalInformation('mpgs_token_hash');
+        if ($token) {
+            $customerId = $payment->getOrder()->getCustomerId();
+
+            /** @var Mastercard_Mpgs_Model_Token $token */
+            $token = Mage::getModel('mpgs/token')->getFromCustomer($customerId);
+
+            return array_merge($source, array(
+                'token' => $token->getToken()
+            ));
+        } else {
+            return $source;
+        }
     }
 
     /**
