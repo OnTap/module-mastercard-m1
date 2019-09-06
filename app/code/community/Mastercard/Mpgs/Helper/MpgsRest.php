@@ -306,6 +306,14 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
      */
     public function buildShippingData( $quote ) 
     {
+        if ($quote instanceof Mage_Sales_Model_Order) {
+            $quote = $quote->getQuote();
+        }
+
+        if ($quote->isVirtual()) {
+            return array();
+        }
+
         $shippingAddress = $quote->getShippingAddress();
         $shippingCountry_2 = $shippingAddress->getCountryId();
         $shippingCountry_3 = Mage::getModel('directory/country')->loadByCode($shippingCountry_2)->getIso3_code();
@@ -337,7 +345,11 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
     {
         $pricesIncludeTax = Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_PRICE_INCLUDES_TAX);
         if ($pricesIncludeTax) {
-            $order['taxAmount'] = number_format($order->getShippingAddress()->getData('tax_amount'), 2);
+            $address = $order->getShippingAddress();
+            if ($order->getIsVirtual()) {
+                $address = $order->getBillingAddress();
+            }
+            $order['taxAmount'] = number_format($address->getData('tax_amount'), 2);
         }
 
         $data = array();
@@ -378,12 +390,19 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
 
         $pricesIncludeTax = Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_PRICE_INCLUDES_TAX);
         if ($pricesIncludeTax) {
-            $order['taxAmount'] = number_format($quote->getShippingAddress()->getData('tax_amount'), 2);
+            $address = $quote->getShippingAddress();
+            if ($quote->isVirtual()) {
+                $address = $quote->getBillingAddress();
+            }
+            $order['taxAmount'] = number_format($address->getData('tax_amount'), 2);
         }
 
         $order['amount'] = sprintf('%.2F', $quote->getGrandTotal());
         $order['currency'] = $quote->getStore()->getBaseCurrencyCode();
-        $order['shippingAndHandlingAmount'] = number_format($quote->getShippingAddress()->getShippingAmount(), 2);
+        $order['shippingAndHandlingAmount'] = number_format(
+            $quote->getShippingAddress() ? $quote->getShippingAddress()->getShippingAmount() : 0.0,
+            2
+        );
         $order['description'] = 'Magento Order';
         $order['notificationUrl'] = $config->getWebhookNotificationUrl();
         $order['reference'] = $quote->getReservedOrderId();

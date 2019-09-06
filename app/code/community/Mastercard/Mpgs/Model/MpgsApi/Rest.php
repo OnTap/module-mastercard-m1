@@ -189,7 +189,10 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data ['interaction'] = $rest->buildInteractionData();
         $data ['customer'] = $rest->buildCustomerData($quote);
         $data ['billing'] = $rest->buildBillingData($quote);
-        $data ['shipping'] = $rest->buildShippingData($quote);
+        $shipping = $rest->buildShippingData($quote);
+        if (!empty($shipping)) {
+            $data ['shipping'] = $shipping;
+        }
         $data ['order'] = $rest->buildOrderDataFromQuote($quote, $this->config);
         $data ['order']['id'] = $mpgs_id;
 
@@ -287,7 +290,10 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 
         $data['customer'] = $rest->buildCustomerData($order);
         $data['billing'] = $rest->buildBillingData($order);
-        $data['shipping'] = $rest->buildShippingData($order);
+        $shipping = $rest->buildShippingData($order);
+        if (!empty($shipping)) {
+            $data['shipping'] = $shipping;
+        }
         $data['order'] = $rest->buildOrderDataFromOrder($order, $this->config);
         if ($session['id']) {
             $data['session'] = $rest->buildSessionData($order->getPayment()->getAdditionalInformation('session'));
@@ -324,7 +330,10 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
 
         $data['customer'] = $rest->buildCustomerData($order);
         $data['billing'] = $rest->buildBillingData($order);
-        $data['shipping'] = $rest->buildShippingData($order);
+        $shipping = $rest->buildShippingData($order);
+        if (!empty($shipping)) {
+            $data['shipping'] = $shipping;
+        }
         $data['order'] = $rest->buildOrderDataFromOrder($order, $this->config);
         $data['session'] = $rest->buildSessionData($order->getPayment()->getAdditionalInformation('session'));
         $data['sourceOfFunds'] = $rest->buildSourceOfFunds($order->getPayment());
