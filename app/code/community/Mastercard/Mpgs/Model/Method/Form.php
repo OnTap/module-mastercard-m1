@@ -37,7 +37,6 @@ class Mastercard_Mpgs_Model_Method_Form extends Mastercard_Mpgs_Model_Method_Abs
         return Mage::getSingleton('mpgs/config_form');
     }
 
-
     /**
      * @return string
      */

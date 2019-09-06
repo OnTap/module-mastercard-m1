@@ -121,6 +121,10 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
                             throw new Exception('Transaction type not recognised.');
                             break;
 
+                        case 'PAYMENT':
+                            $helper->addTxnPayment($payment, $txn, Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE, true);
+                            break;
+
                         case 'AUTHORIZATION':
                             $txnAuth = $helper->addTxnPayment($payment, $txn, Mage_Sales_Model_Order_Payment_Transaction::TYPE_AUTH, true);
                             break;
@@ -137,14 +141,16 @@ class Mastercard_Mpgs_Model_Method_Hosted extends Mastercard_Mpgs_Model_Method_A
                 $helper->addPayTnxPayment($payment, $orderInfo);
             }
         } else {
-            $captureInfo = $restAPI->capture_order(
+            $orderInfo = $restAPI->capture_order(
                 $order->getIncrementId(),
                 $amount,
                 $order->getOrderCurrencyCode()
             );
-            $helper->updateTransferInfo($payment, $captureInfo);
-            $helper->addCaptureTxnPayment($payment, $captureInfo, $txnAuth->getTxnId(), $helper->isAllPaid($payment, $captureInfo));
+            $helper->addCaptureTxnPayment($payment, $orderInfo, $txnAuth->getTxnId(), $helper->isAllPaid($payment, $captureInfo));
         }
+
+        $helper->updatePaymentInfo($payment, $orderInfo);
+        $helper->updateTransferInfo($payment, $orderInfo);
 
         return $this;
     }
