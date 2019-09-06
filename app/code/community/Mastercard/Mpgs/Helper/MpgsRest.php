@@ -351,7 +351,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         $data['item'] = array();
 
         /** @var Mage_Sales_Model_Order_Item $item */
-        foreach ($order->getAllItems() as $item) {
+        foreach ($order->getAllVisibleItems() as $item) {
             $iteminfo['name'] = $item->getName();
             $iteminfo['description'] = $item->getDescription();
             $iteminfo['sku'] = $item->getSku();
@@ -390,7 +390,7 @@ class Mastercard_Mpgs_Helper_MpgsRest extends Mage_Core_Helper_Abstract
         $i = 0;
 
         /** @var Mage_Sales_Model_Quote_Item $item */
-        foreach ($quote->getAllItems() as $item) {
+        foreach ($quote->getAllVisibleItems() as $item) {
             $iteminfo['name'] = $item->getName();
             $iteminfo['description'] = $item->getDescription();
             $iteminfo['sku'] = $item->getSku();
