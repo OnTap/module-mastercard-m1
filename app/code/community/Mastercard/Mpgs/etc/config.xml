@@ -18,7 +18,7 @@
 <config>
     <modules>
         <Mastercard_Mpgs>
-            <version>1.2.1.2</version>
+            <version>1.2.2.0</version>
         </Mastercard_Mpgs>
     </modules>
     <global>
