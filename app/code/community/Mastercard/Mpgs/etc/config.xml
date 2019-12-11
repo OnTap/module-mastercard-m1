@@ -113,6 +113,19 @@
             </endpoints>
         </Mastercard>
     </global>
+    <adminhtml>
+        <events>
+            <controller_action_predispatch>
+                <observers>
+                    <mastercard_mpgs_admin_notifications>
+                        <type>model</type>
+                        <class>mpgs/observer</class>
+                        <method>checkNotificationsPreDispatch</method>
+                    </mastercard_mpgs_admin_notifications>
+                </observers>
+            </controller_action_predispatch>
+        </events>
+    </adminhtml>
     <frontend>
         <routers>
             <checkout>
@@ -148,6 +161,12 @@
         </layout>
     </frontend>
     <default>
+        <mastercard>
+            <adminnotification>
+                <feed_url>https://raw.githubusercontent.com/Mastercard-Gateway/gateway-modules-common/master/magento1.rss</feed_url>
+                <frequency>1</frequency>
+            </adminnotification>
+        </mastercard>
         <payment>
             <Mastercard_hosted>
                 <model>mpgs/method_hosted</model>
