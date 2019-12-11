@@ -30,6 +30,7 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
     protected $pathWebhookUrl = null;
     protected $pathCurrency = null;
     protected $pathDebug = null;
+    protected $pathSendLineItems = null;
 
     /**
      * @return string
@@ -200,5 +201,13 @@ class Mastercard_Mpgs_Model_Config extends Varien_Object
             return $msg;
         }
         return "Internal Error";
+    }
+
+    /**
+     * @return bool
+     */
+    public function getSendLineItems()
+    {
+        return (bool) Mage::getStoreConfig($this->pathSendLineItems);
     }
 }

@@ -26,6 +26,7 @@ class Mastercard_Mpgs_Model_Config_Hosted extends Mastercard_Mpgs_Model_Config
     protected $pathApiPassword = 'payment/Mastercard_hosted/api_password';
     protected $pathEndpointUrl = 'payment/Mastercard_hosted/end_point_url';
     protected $pathWebhookSecret = 'payment/Mastercard_hosted/webhook_secret';
+    protected $pathSendLineItems = 'payment/Mastercard_hosted/send_line_items';
 
     /**
      * @return string
