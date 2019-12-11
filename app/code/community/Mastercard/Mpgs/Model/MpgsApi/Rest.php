@@ -141,7 +141,8 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
             ),
             'session' => array(
                 'id' => $sessionId
-            )
+            ),
+            'partnerSolutionId' => $this->getVersionString(),
         );
 
         $response = $this->sender(self::MPGS_PUT, '3DSecureId/' . $threeDSecureId, $data);
@@ -171,7 +172,8 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
             '3DSecure' => array(
                 'paRes' => $paRes
             ),
-            'apiOperation' => 'PROCESS_ACS_RESULT'
+            'partnerSolutionId' => $this->getVersionString(),
+            'apiOperation' => 'PROCESS_ACS_RESULT',
         );
 
         $response = $this->sender(self::MPGS_POST, '3DSecureId/' . $threeDSecureId, $data);
@@ -208,6 +210,8 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data ['order'] = $rest->buildOrderDataFromQuote($quote, $this->config);
         $data ['order']['id'] = $mpgs_id;
 
+        $data ['partnerSolutionId'] = $this->getVersionString();
+
         $resData = $this->sender(self::MPGS_POST, 'session', $data);
 
         if ($resData ['session'] ['updateStatus'] !== 'SUCCESS') {
@@ -215,6 +219,18 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         }
 
         return $resData;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getVersionString()
+    {
+        $edition = Mage::getEdition();
+        $v = Mage::getVersionInfo();
+        $magentoVersion = sprintf('%s.%s.%s.%s', $v['major'], $v['minor'], $v['revision'], $v['patch']);
+        $moduleVersion = (string) Mage::getConfig()->getNode()->modules->Mastercard_Mpgs->version;
+        return sprintf('Magento_%s_%s__%s', $edition, $magentoVersion, $moduleVersion);
     }
 
     /**
@@ -232,7 +248,8 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
             ),
             'sourceOfFunds' => array(
                 'type' => 'CARD'
-            )
+            ),
+            'partnerSolutionId' => $this->getVersionString()
         );
         $response = $this->sender(self::MPGS_POST, 'token/', $data);
         // @todo validation
@@ -276,7 +293,8 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
     {
         $resData = $this->sender(
             self::MPGS_POST, 'session', array(
-            'correlationId' => null
+                'correlationId' => null,
+                'partnerSolutionId' => $this->getVersionString()
             )
         );
         return $resData;
@@ -321,6 +339,8 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         }
 
         $txnId = uniqid(sprintf('%s-', $orderId));
+        $data['partnerSolutionId'] = $this->getVersionString();
+
         return $this->sender(self::MPGS_PUT, 'order/' . $orderId . '/transaction/' . $txnId, $data);
     }
 
@@ -359,6 +379,8 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         }
 
         $txnId = uniqid(sprintf('%s-', $orderId));
+        $data['partnerSolutionId'] = $this->getVersionString();
+
         return $this->sender(self::MPGS_PUT, 'order/' . $orderId . '/transaction/' . $txnId, $data);
     }
 
@@ -424,6 +446,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data ['apiOperation'] = 'CAPTURE';
         $data ['transaction'] ['amount'] = sprintf('%.2F', $amount);
         $data ['transaction'] ['currency'] = $currency;
+        $data ['partnerSolutionId'] = $this->getVersionString();
         $txnid = uniqid(sprintf('%s-', ( string ) $mpgs_id));
 
         $resData = $this->sender(self::MPGS_PUT, 'order/' . $mpgs_id . '/transaction/' . $txnid, $data);
@@ -445,6 +468,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
         $data ['apiOperation'] = 'REFUND';
         $data ['transaction'] ['amount'] = sprintf('%.2F', $amount);
         $data ['transaction'] ['currency'] = $currency;
+        $data ['partnerSolutionId'] = $this->getVersionString();
         $txnid = uniqid(sprintf('%s-', ( string ) $mpgs_id));
 
         $resData = $this->sender(self::MPGS_PUT, 'order/' . $mpgs_id . '/transaction/' . $txnid, $data);
@@ -464,6 +488,7 @@ class Mastercard_Mpgs_Model_MpgsApi_Rest extends Varien_Object
     {
         $data ['apiOperation'] = 'VOID';
         $data ['transaction'] ['targetTransactionId'] = $txnid;
+        $data ['partnerSolutionId'] = $this->getVersionString();
 
         $_txnid = uniqid(sprintf('%s-', ( string ) $mpgs_id));
 
