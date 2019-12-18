@@ -18,7 +18,7 @@
 <config>
     <modules>
         <Mastercard_Mpgs>
-            <version>1.2.1.2</version>
+            <version>1.3.0.0</version>
         </Mastercard_Mpgs>
     </modules>
     <global>
@@ -113,6 +113,19 @@
             </endpoints>
         </Mastercard>
     </global>
+    <adminhtml>
+        <events>
+            <controller_action_predispatch>
+                <observers>
+                    <mastercard_mpgs_admin_notifications>
+                        <type>model</type>
+                        <class>mpgs/observer</class>
+                        <method>checkNotificationsPreDispatch</method>
+                    </mastercard_mpgs_admin_notifications>
+                </observers>
+            </controller_action_predispatch>
+        </events>
+    </adminhtml>
     <frontend>
         <routers>
             <checkout>
@@ -148,6 +161,12 @@
         </layout>
     </frontend>
     <default>
+        <mastercard>
+            <adminnotification>
+                <feed_url>https://raw.githubusercontent.com/Mastercard-Gateway/gateway-modules-common/master/magento1.rss</feed_url>
+                <frequency>1</frequency>
+            </adminnotification>
+        </mastercard>
         <payment>
             <Mastercard_hosted>
                 <model>mpgs/method_hosted</model>
@@ -164,6 +183,7 @@
                 <order_status>processing</order_status>
                 <currency>USD</currency>
                 <allowspecific>0</allowspecific>
+                <send_line_items>1</send_line_items>
             </Mastercard_hosted>
             <Mastercard_form>
                 <model>mpgs/method_form</model>
@@ -183,6 +203,7 @@
                 <order_status>processing</order_status>
                 <currency>USD</currency>
                 <allowspecific>0</allowspecific>
+                <send_line_items>1</send_line_items>
             </Mastercard_form>
         </payment>
     </default>

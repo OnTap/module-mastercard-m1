@@ -14,8 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 class Mastercard_Mpgs_Model_Observer
 {
+    /**
+     * @param Varien_Event_Observer $observer
+     */
+    public function checkNotificationsPreDispatch(Varien_Event_Observer $observer)
+    {
+        if (Mage::getSingleton('admin/session')->isLoggedIn()) {
+            $feedModel  = Mage::getModel('mpgs/feed');
+            /* @var $feedModel Mastercard_Mpgs_Model_Feed */
+
+            $feedModel->checkUpdate();
+        }
+    }
+
     /**
      * This method updates the result code from a MPGS payment reponse.
      *

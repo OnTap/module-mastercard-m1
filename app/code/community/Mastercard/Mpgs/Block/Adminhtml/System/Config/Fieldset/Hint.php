@@ -30,4 +30,12 @@ class Mastercard_Mpgs_Block_Adminhtml_System_Config_Fieldset_Hint
     {
         return $this->toHtml();
     }
+
+    /**
+     * @return string
+     */
+    public function getModuleVersion()
+    {
+        return (string) Mage::getConfig()->getNode()->modules->Mastercard_Mpgs->version;
+    }
 }

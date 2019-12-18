@@ -31,6 +31,7 @@ class Mastercard_Mpgs_Model_Config_Form extends Mastercard_Mpgs_Model_Config
     protected $pathThreeDSecure = 'payment/Mastercard_form/three_d_secure';
     protected $pathSavedCards = 'payment/Mastercard_form/save_card';
     protected $pathSavedCardsRequireCvv = 'payment/Mastercard_form/save_card_use_cvv';
+    protected $pathSendLineItems = 'payment/Mastercard_form/send_line_items';
 
     /**
      * @return string
